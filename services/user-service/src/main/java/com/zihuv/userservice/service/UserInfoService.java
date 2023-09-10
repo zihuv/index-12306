@@ -28,4 +28,12 @@ public interface UserInfoService extends IService<UserInfo> {
      * @param requestParam 用户信息入参
      */
     void update(UserInfo requestParam);
+
+    /**
+     * 查询是否存在该用户名
+     *
+     * @param username 用户名
+     * @return java.lang.Boolean
+     */
+    Boolean hasUsername(String username);
 }

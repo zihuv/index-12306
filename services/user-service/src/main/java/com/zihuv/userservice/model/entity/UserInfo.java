@@ -1,11 +1,15 @@
 package com.zihuv.userservice.model.entity;
 
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 @TableName(value = "tb_user")
 @Data
 public class UserInfo {
+
+    @TableId
+    private Long id;
 
     /**
      * 用户名

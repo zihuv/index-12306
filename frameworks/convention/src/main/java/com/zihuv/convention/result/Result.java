@@ -24,15 +24,15 @@ public class Result<T> {
      */
     private T data;
 
-    public static <T> Result<T> ok() {
-        return Result.ok(null);
+    public static <T> Result<T> success() {
+        return Result.success(null);
     }
 
-    public static <T> Result<T> ok(T data) {
-        return Result.ok("操作成功", data);
+    public static <T> Result<T> success(T data) {
+        return Result.success("操作成功", data);
     }
 
-    public static <T> Result<T> ok(String message, T data) {
+    public static <T> Result<T> success(String message, T data) {
         return Result.generate(200, message, data);
     }
 
