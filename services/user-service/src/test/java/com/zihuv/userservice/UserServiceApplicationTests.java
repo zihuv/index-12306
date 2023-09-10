@@ -1,4 +1,4 @@
-package com.zihuv.common;
+package com.zihuv.userservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
