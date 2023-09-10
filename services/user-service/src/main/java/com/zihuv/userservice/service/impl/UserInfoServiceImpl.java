@@ -37,4 +37,13 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
     public void update(UserInfo requestParam) {
 
     }
+
+    @Override
+    public Boolean hasUsername(String username) {
+        // TODO 使用缓存查询该用户名是否存在
+        LambdaQueryWrapper<UserInfo> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(UserInfo::getUsername,username);
+        UserInfo userInfo = this.getOne(lqw);
+        return Objects.nonNull(userInfo);
+    }
 }
