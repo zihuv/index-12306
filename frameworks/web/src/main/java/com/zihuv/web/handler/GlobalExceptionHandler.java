@@ -1,21 +1,13 @@
 package com.zihuv.web.handler;
 
-import cn.hutool.core.collection.CollectionUtil;
-import cn.hutool.core.util.StrUtil;
-import com.zihuv.convention.errcode.ErrorCode;
 import com.zihuv.convention.exception.AbstractException;
 import com.zihuv.convention.result.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import java.util.Optional;
 
 /**
  * 全局异常处理器
@@ -39,12 +31,8 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = {AbstractException.class})
     public Result<?> abstractException(HttpServletRequest request, AbstractException ex) {
-        if (ex.getCause() != null) {
-            log.error("[{}] {} [ex] {}", request.getMethod(), request.getRequestURL().toString(), ex.toString(), ex.getCause());
-            return Result.fail(String.valueOf(ex));
-        }
-        log.error("[{}] {} [ex] {}", request.getMethod(), request.getRequestURL().toString(), ex.toString());
-        return Result.fail(String.valueOf(ex));
+        log.error("[{}] {} [ex] {}", request.getMethod(), getUrl(request), ex.getErrorMessage());
+        return Result.fail(ex.getErrorMessage());
     }
 
     /**
@@ -53,7 +41,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(value = Exception.class)
     public Result<?> defaultErrorHandler(HttpServletRequest request, Exception e) {
         log.error("[{}] {} ", request.getMethod(), getUrl(request), e);
-        return Result.fail(String.valueOf(e.getMessage()) );
+        return Result.fail(e.getMessage());
     }
 
     private String getUrl(HttpServletRequest request) {
