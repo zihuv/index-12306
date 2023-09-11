@@ -16,6 +16,7 @@
         <module>log</module>
         <module>convention</module>
         <module>web</module>
+        <module>designpattern</module>
     </modules>
 
 </project>

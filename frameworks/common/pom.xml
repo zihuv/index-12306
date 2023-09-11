@@ -8,7 +8,7 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>common</artifactId>
+    <artifactId>index12306-common-spring-boot-starter</artifactId>
 
     <dependencies>
         <!-- spring boot base  -->
