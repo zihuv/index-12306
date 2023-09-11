@@ -1,7 +1,7 @@
 package com.zihuv.convention.exception;
 
 
-import com.zihuv.convention.errcode.ErrorCode;
+import com.zihuv.convention.errcode.BaseErrorCode;
 
 /**
  * 远程服务调用异常
@@ -9,14 +9,14 @@ import com.zihuv.convention.errcode.ErrorCode;
 public class RemoteException extends AbstractException {
 
     public RemoteException(String message) {
-        this(message, null, ErrorCode.REMOTE_ERROR);
+        this(message, null, BaseErrorCode.REMOTE_ERROR);
     }
 
-    public RemoteException(String message, ErrorCode errorCode) {
+    public RemoteException(String message, BaseErrorCode errorCode) {
         this(message, null, errorCode);
     }
 
-    public RemoteException(String message, Throwable throwable, ErrorCode errorCode) {
+    public RemoteException(String message, Throwable throwable, BaseErrorCode errorCode) {
         super(message, throwable, errorCode);
     }
 

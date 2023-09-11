@@ -1,6 +1,7 @@
 package com.zihuv.convention.exception;
 
-import com.zihuv.convention.errcode.ErrorCode;
+import com.zihuv.convention.errcode.BaseErrorCode;
+import com.zihuv.convention.errcode.IErrorCode;
 import lombok.Getter;
 import org.springframework.util.StringUtils;
 
@@ -21,9 +22,9 @@ public abstract class AbstractException extends RuntimeException {
 
     public final String errorMessage;
 
-    public AbstractException(String message, Throwable throwable, ErrorCode errorCode) {
+    public AbstractException(String message, Throwable throwable, IErrorCode errorCode) {
         super(message, throwable);
-        this.errorCode = errorCode.getCode();
-        this.errorMessage = Optional.ofNullable(StringUtils.hasLength(message) ? message : null).orElse(errorCode.getMessage());
+        this.errorCode = errorCode.code();
+        this.errorMessage = StringUtils.hasLength(message) ? message : errorCode.message();
     }
 }

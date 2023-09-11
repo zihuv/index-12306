@@ -1,6 +1,6 @@
 package com.zihuv.convention.exception;
 
-import com.zihuv.convention.errcode.ErrorCode;
+import com.zihuv.convention.errcode.BaseErrorCode;
 
 import java.util.Optional;
 
@@ -11,18 +11,18 @@ import java.util.Optional;
 public class ServiceException extends AbstractException {
 
     public ServiceException(String message) {
-        this(message, null, ErrorCode.SERVICE_ERROR);
+        this(message, null, BaseErrorCode.SERVICE_ERROR);
     }
 
-    public ServiceException(ErrorCode errorCode) {
+    public ServiceException(BaseErrorCode errorCode) {
         this(null, errorCode);
     }
 
-    public ServiceException(String message, ErrorCode errorCode) {
+    public ServiceException(String message, BaseErrorCode errorCode) {
         this(message, null, errorCode);
     }
 
-    public ServiceException(String message, Throwable throwable, ErrorCode errorCode) {
+    public ServiceException(String message, Throwable throwable, BaseErrorCode errorCode) {
         super(Optional.ofNullable(message).orElse(errorCode.getMessage()), throwable, errorCode);
     }
 

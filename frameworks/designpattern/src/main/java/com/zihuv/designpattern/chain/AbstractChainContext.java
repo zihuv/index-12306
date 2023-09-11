@@ -31,7 +31,7 @@ public class AbstractChainContext<T> implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         // 从上下文中获取实现接口 AbstractChainHandler 的所有过滤链 Map<beanName, bean>
         Map<String, AbstractChainHandler> chainFilterMap = ApplicationContextHolder
                 .getBeansOfType(AbstractChainHandler.class);
