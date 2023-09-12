@@ -1,5 +1,6 @@
 package com.zihuv.userservice.controller;
 
+import com.zihuv.DistributedCache;
 import com.zihuv.convention.result.Result;
 import com.zihuv.userservice.model.entity.UserInfo;
 import com.zihuv.userservice.model.param.UserRegisterParam;
@@ -33,7 +34,7 @@ public class UserInfoController {
 
     @Operation(summary = "检查用户名是否已存在 true-存在 false-不存在")
     @GetMapping("/api/user-service/has-username")
-    public Result<Boolean> hasUsername(@RequestParam("username") @NotBlank String username) {
+    public Result<Boolean> hasUsername(@RequestParam("username") @NotBlank(message = "用户名不能为空") String username) {
         return Result.success(userInfoService.hasUsername(username));
     }
 

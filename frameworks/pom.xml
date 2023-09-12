@@ -17,6 +17,7 @@
         <module>convention</module>
         <module>web</module>
         <module>designpattern</module>
+        <module>cache</module>
     </modules>
 
 </project>
