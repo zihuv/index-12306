@@ -1,5 +1,6 @@
 package com.zihuv.common.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zihuv.common.context.ApplicationContextHolder;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -12,5 +13,10 @@ public class CommonAutoConfiguration {
     @ConditionalOnMissingBean
     public ApplicationContextHolder applicationContextHolder() {
         return new ApplicationContextHolder();
+    }
+
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
     }
 }
