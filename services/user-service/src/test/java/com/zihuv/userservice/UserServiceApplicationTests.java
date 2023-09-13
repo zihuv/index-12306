@@ -1,5 +1,6 @@
 package com.zihuv.userservice;
 
+import com.zihuv.database.handler.CustomIdGenerator;
 import com.zihuv.designpattern.chain.AbstractChainContext;
 import com.zihuv.userservice.model.param.UserRegisterParam;
 import org.junit.jupiter.api.Test;
@@ -11,9 +12,12 @@ class UserServiceApplicationTests {
     @Autowired
     private AbstractChainContext<UserRegisterParam> abstractChainContext;
 
+    @Autowired
+    private CustomIdGenerator customIdGenerator;
     @Test
     void contextLoads() {
-        abstractChainContext.handler("USER_REGISTER_FILTER",new UserRegisterParam());
+        customIdGenerator.nextId(null);
+        customIdGenerator.nextId(null);
     }
 
 }

@@ -18,6 +18,7 @@
         <module>web</module>
         <module>designpattern</module>
         <module>cache</module>
+        <module>database</module>
     </modules>
 
 </project>
