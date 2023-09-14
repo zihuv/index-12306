@@ -1,5 +1,5 @@
 server:
-  port: 9000
+  port: 10000
 spring:
   application:
     name: index12306-gateway-service

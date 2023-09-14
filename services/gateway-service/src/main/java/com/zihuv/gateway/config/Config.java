@@ -1,4 +1,4 @@
-package org.opengoofy.index12306.biz.gatewayservice.config;
+package com.zihuv.gateway.config;
 
 import lombok.Data;
 
