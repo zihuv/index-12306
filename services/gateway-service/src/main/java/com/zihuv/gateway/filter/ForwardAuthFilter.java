@@ -13,6 +13,7 @@ import reactor.core.publisher.Mono;
  */
 @Component
 public class ForwardAuthFilter implements GlobalFilter {
+
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         ServerHttpRequest newRequest = exchange

@@ -1,0 +1,2 @@
+sa-token:
+  require-same-token: false

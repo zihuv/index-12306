@@ -13,7 +13,10 @@ import java.util.List;
 
 @Configuration
 public class SaTokenGatewayConfiguration {
-    // 注册 Sa-Token全局过滤器
+
+    /**
+     * 注册 Sa-Token 全局鉴权过滤器
+     */
     @Bean
     public SaReactorFilter getSaReactorFilter() {
         return new SaReactorFilter()
@@ -24,15 +27,13 @@ public class SaTokenGatewayConfiguration {
                 // 鉴权方法：每次访问进入
                 .setAuth(obj -> {
                     // 登录校验 -- 拦截所有路由，并排除/user/doLogin 用于开放登录
-                    SaRouter.match("/**", "/user/doLogin", r -> StpUtil.checkLogin());
+                   // SaRouter.match("/**", "/user/doLogin", r -> StpUtil.checkLogin());
 
                     // 权限认证 -- 不同模块, 校验不同权限
-                    SaRouter.match("/user/**", r -> StpUtil.checkPermission("user"));
-                    SaRouter.match("/admin/**", r -> StpUtil.checkPermission("admin"));
-                    SaRouter.match("/goods/**", r -> StpUtil.checkPermission("goods"));
-                    SaRouter.match("/orders/**", r -> StpUtil.checkPermission("orders"));
-
-                    // 更多匹配 ...  */
+//                    SaRouter.match("/user/**", r -> StpUtil.checkPermission("user"));
+//                    SaRouter.match("/admin/**", r -> StpUtil.checkPermission("admin"));
+//                    SaRouter.match("/goods/**", r -> StpUtil.checkPermission("goods"));
+//                    SaRouter.match("/orders/**", r -> StpUtil.checkPermission("orders"));
                 })
                 // 异常处理方法：每次setAuth函数出现异常时进入
                 .setError(e -> {

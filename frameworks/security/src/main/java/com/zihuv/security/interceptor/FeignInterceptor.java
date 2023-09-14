@@ -5,7 +5,7 @@ import feign.RequestInterceptor;
 import feign.RequestTemplate;
 
 /**
- * feign拦截器, 在feign请求发出之前，加入一些操作
+ * Feign 拦截器, 在 Feign 请求发出之前，加入一些操作
  */
 public class FeignInterceptor implements RequestInterceptor {
 
@@ -13,8 +13,5 @@ public class FeignInterceptor implements RequestInterceptor {
     @Override
     public void apply(RequestTemplate requestTemplate) {
         requestTemplate.header(SaSameUtil.SAME_TOKEN, SaSameUtil.getToken());
-
-        // 如果希望被调用方有会话状态，此处就还需要将 satoken 添加到请求头中
-        // requestTemplate.header(StpUtil.getTokenName(), StpUtil.getTokenValue());
     }
 }

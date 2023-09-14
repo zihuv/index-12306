@@ -9,45 +9,13 @@
         <version>${revision}</version>
     </parent>
 
-    <artifactId>user-service</artifactId>
-    <description>user-service</description>
+    <artifactId>index12306-user-service</artifactId>
+    <packaging>pom</packaging>
+    <description>index12306-user-service</description>
 
-    <dependencies>
-        <dependency>
-            <groupId>com.zihuv.index12306</groupId>
-            <artifactId>index12306-common-spring-boot-starter</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.zihuv.index12306</groupId>
-            <artifactId>convention</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.zihuv.index12306</groupId>
-            <artifactId>index12306-web-spring-boot-starter</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.zihuv.index12306</groupId>
-            <artifactId>index12306-designpattern-spring-boot-starter</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.zihuv.index12306</groupId>
-            <artifactId>index12306-cache-spring-boot-starter</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.zihuv.index12306</groupId>
-            <artifactId>index12306-database-spring-boot-starter</artifactId>
-            <version>${revision}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.zihuv.index12306</groupId>
-            <artifactId>index12306-security-spring-boot-starter</artifactId>
-            <version>${revision}</version>
-        </dependency>
-    </dependencies>
+    <modules>
+        <module>user-service-func</module>
+        <module>user-service-api</module>
+    </modules>
 
 </project>
