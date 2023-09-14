@@ -1,11 +1,11 @@
-#spring:
-#  cloud:
-#    gateway:
-#      routes:
-#        - id: index12306-user-service
-#          uri: lb://index12306-user${unique-name:}-service/api/user-service/**
-#          predicates:
-#            - Path=/api/user-service/**
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: index12306-user-service
+          uri: lb://index12306-user-service/api/user-service/**
+          predicates:
+            - Path=/api/user-service/**
 ##          filters:
 ##            - name: TokenValidate
 ##              args:

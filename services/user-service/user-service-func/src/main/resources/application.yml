@@ -1,8 +1,10 @@
 server:
   port: 9000
 spring:
+  profiles:
+    active: '@environment@'
   application:
-    name: user-service
+    name: index12306-user-service
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://192.168.88.130:3306/my_12306
