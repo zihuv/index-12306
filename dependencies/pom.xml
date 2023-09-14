@@ -32,6 +32,7 @@
         <hippo4j-threadpool-config-mode.version>1.5.0</hippo4j-threadpool-config-mode.version>
         <druid.version>1.2.18</druid.version>
         <knife4j.version>4.3.0</knife4j.version>
+        <sa-token.version>1.35.0.RC</sa-token.version>
     </properties>
 
     <dependencyManagement>
@@ -145,6 +146,23 @@
                 <version>${knife4j.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>cn.dev33</groupId>
+                <artifactId>sa-token-spring-boot3-starter</artifactId>
+                <version>${sa-token.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>cn.dev33</groupId>
+                <artifactId>sa-token-redis-jackson</artifactId>
+                <version>${sa-token.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>cn.dev33</groupId>
+                <artifactId>sa-token-reactor-spring-boot3-starter</artifactId>
+                <version>${sa-token.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
