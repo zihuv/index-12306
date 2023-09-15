@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.springframework.beans.factory.annotation.Value;
 
 @Aspect
 @Slf4j
@@ -19,6 +20,9 @@ public class ILogPrintAspect {
     private final HttpServletRequest request;
     private final ILogService logService;
     private final ObjectMapper objectMapper;
+
+    @Value("${index-12306.insert-logs:true}")
+    private boolean insertLogs;
 
     /**
      * 打印类或方法上的 {@link ILog}
@@ -36,7 +40,10 @@ public class ILogPrintAspect {
         logDTO.setIp(request.getRemoteAddr());
         logDTO.setUri(request.getRequestURI());
         logDTO.setMethod(request.getMethod());
-        logService.logAsync(joinPoint, iLog, logDTO, result);
+
+        if (insertLogs) {
+            logService.logAsync(joinPoint, iLog, logDTO, result);
+        }
 
         log.info("[{}] {}, executeTime: {}ms, info: {}", request.getMethod(), logDTO.getUri(),  logDTO.getSpendTime(), objectMapper.writeValueAsString(result));
         return result;

@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "用户信息")
 @Validated
-@RestController()
+@RestController
 @RequiredArgsConstructor
 public class UserInfoController {
 

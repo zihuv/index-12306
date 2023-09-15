@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SecurityAutoConfiguration {
 
-    @Value("${sa-token.require-same-token:true}")
+    @Value("${index-12306.check-same-token:true}")
     private boolean requireSameToken;
 
     // 注册 Sa-Token 全局过滤器
