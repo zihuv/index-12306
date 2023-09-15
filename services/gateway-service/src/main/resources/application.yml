@@ -4,12 +4,12 @@ spring:
   application:
     name: index12306-gateway-service
   profiles:
-    # active: aggregation
-    active: dev
+    active: '@environment@'
   cloud:
     nacos:
       discovery:
         server-addr: 192.168.88.130:8848
+
   data:
     redis:
       host: 192.168.88.130 # Redis服务器地址

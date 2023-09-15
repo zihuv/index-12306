@@ -15,7 +15,7 @@
 
     <modules>
         <module>user-service-func</module>
-        <module>user-service-api</module>
+        <module>user-service-feign</module>
     </modules>
 
 </project>

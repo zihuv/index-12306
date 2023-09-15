@@ -1,2 +1,13 @@
+# knife4j的增强配置，不需要增强可以不配
+knife4j:
+  enable: true
+  setting:
+    language: zh_cn
+springdoc:
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+
 sa-token:
+  # 禁止使用 same-token，使开发环境下直接访问子服务
   require-same-token: false
