@@ -56,8 +56,4 @@ feign:
   sentinel:
     enabled: true
 
-mybatis-plus:
-  configuration:
-    mapUnderscoreToCamelCase: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 

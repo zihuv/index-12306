@@ -8,6 +8,15 @@ springdoc:
     - group: 'default'
       paths-to-match: '/**'
 
-sa-token:
-  # 禁止使用 same-token，使开发环境下直接访问子服务
-  require-same-token: false
+# 项目配置
+index-12306:
+  # 不检查 same-token，在开发环境下允许直接访问子服务进行接口测试
+  check-same-token: false
+  # 是否将日志信息添加进数据库
+  insert-logs: false
+
+mybatis-plus:
+  configuration:
+    mapUnderscoreToCamelCase: true
+    # 打印 sql 日志
+    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
