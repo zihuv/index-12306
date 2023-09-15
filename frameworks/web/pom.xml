@@ -19,7 +19,7 @@
 
         <dependency>
             <groupId>com.zihuv.index12306</groupId>
-            <artifactId>convention</artifactId>
+            <artifactId>index12306-convention-spring-boot-starter</artifactId>
             <version>${revision}</version>
         </dependency>
 

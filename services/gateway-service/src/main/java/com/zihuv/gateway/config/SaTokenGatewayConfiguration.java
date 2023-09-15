@@ -47,7 +47,7 @@ public class SaTokenGatewayConfiguration {
      */
     @Component
     public static class StpInterfaceImpl implements StpInterface {
-
+        // TODO 授权
         @Override
         public List<String> getPermissionList(Object loginId, String loginType) {
             // 返回此 loginId 拥有的权限列表
