@@ -1,12 +1,15 @@
 package com.zihuv.log.core;
 
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zihuv.convention.enums.OperateTypeEnum;
 import com.zihuv.convention.result.Result;
 import com.zihuv.log.annotation.ILog;
+import com.zihuv.log.mapper.ILogMapper;
 import com.zihuv.log.pojo.ILogDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Service;
@@ -21,7 +24,8 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class ILogServiceImpl implements ILogService{
+@RequiredArgsConstructor
+public class ILogServiceImpl extends ServiceImpl<ILogMapper,ILogDTO> implements ILogService{
 
     @Override
     public void logAsync(ProceedingJoinPoint joinPoint, ILog log, ILogDTO logDTO, Object result) {
@@ -56,7 +60,7 @@ public class ILogServiceImpl implements ILogService{
         logDTO.setResult(result);
         logDTO.setStatus(status);
 
-        // TODO 将结果存进数据库
+        this.save(logDTO);
     }
 
     /**

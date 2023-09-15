@@ -1,13 +1,21 @@
 package com.zihuv.log.pojo;
 
-import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
-public class ILogDTO {
+@TableName("tb_logs")
+public class ILogDTO implements Serializable {
+
+    @Serial
+    private static final long serialVersionUID = 1L;
 
     @TableId
     private Long id;
@@ -50,10 +58,12 @@ public class ILogDTO {
     /**
      * 请求参数
      */
+    @TableField(typeHandler = JacksonTypeHandler.class)
     private Object parameter;
 
     /**
      * 请求返回的结果
      */
+    @TableField(typeHandler = JacksonTypeHandler.class)
     private Object result;
 }

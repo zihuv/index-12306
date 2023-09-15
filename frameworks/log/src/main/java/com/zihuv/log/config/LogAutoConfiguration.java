@@ -17,8 +17,8 @@ public class LogAutoConfiguration {
      * {@link ILog} 日志打印 AOP 切面
      */
     @Bean
-    public ILogPrintAspect iLogPrintAspect(HttpServletRequest request, ILogService logService,ObjectMapper objectMapper) {
-        return new ILogPrintAspect(request,logService,objectMapper);
+    public ILogPrintAspect iLogPrintAspect(HttpServletRequest request, ILogService logService, ObjectMapper objectMapper) {
+        return new ILogPrintAspect(request, logService, objectMapper);
     }
 
     @Bean

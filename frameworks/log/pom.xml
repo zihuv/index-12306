@@ -26,13 +26,14 @@
         </dependency>
 
         <dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <groupId>com.zihuv.index12306</groupId>
+            <artifactId>index12306-convention-spring-boot-starter</artifactId>
+            <version>${revision}</version>
         </dependency>
 
         <dependency>
             <groupId>com.zihuv.index12306</groupId>
-            <artifactId>index12306-convention-spring-boot-starter</artifactId>
+            <artifactId>index12306-database-spring-boot-starter</artifactId>
             <version>${revision}</version>
         </dependency>
 
