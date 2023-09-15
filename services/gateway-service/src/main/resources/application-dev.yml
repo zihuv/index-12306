@@ -1,11 +1,31 @@
+knife4j:
+  # 聚合swagger文档
+  gateway:
+    enabled: true
+    strategy: discover
+#    # 排序规则
+#    tags-sorter: order
+#    operations-sorter: order
+#    discover:
+#      enabled: true
+#      version: openapi3
+##      # 各个聚合服务的个性化配置，key:注册中心中的服务名称，value：个性化配置
+#      service-config:
+#        order-service:
+#          - group-name: 订单服务
+#            order: 1
+#        user-service:
+#          - group-name: 用户服务
+#            order: 2
+
 spring:
   cloud:
     gateway:
       routes:
         - id: index12306-user-service
-          uri: lb://index12306-user-service/api/user-service/**
+          uri: lb://index12306-user-service/**
           predicates:
-            - Path=/api/user-service/**
+            - Path=/**
 ##          filters:
 ##            - name: TokenValidate
 ##              args:

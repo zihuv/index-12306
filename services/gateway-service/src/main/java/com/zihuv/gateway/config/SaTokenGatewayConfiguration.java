@@ -23,7 +23,7 @@ public class SaTokenGatewayConfiguration {
                 // 拦截地址
                 .addInclude("/**")    /* 拦截全部path */
                 // 开放地址
-                .addExclude("/favicon.ico")
+                .addExclude("/favicon.ico","/doc.html")
                 // 鉴权方法：每次访问进入
                 .setAuth(obj -> {
                     // 登录校验 -- 拦截所有路由，并排除/user/doLogin 用于开放登录
