@@ -2,6 +2,7 @@ package com.zihuv.userservice.controller;
 
 import com.zihuv.DistributedCache;
 import com.zihuv.convention.result.Result;
+import com.zihuv.log.annotation.ILog;
 import com.zihuv.userservice.model.entity.UserInfo;
 import com.zihuv.userservice.model.param.UserRegisterParam;
 import com.zihuv.userservice.service.UserInfoService;
@@ -25,6 +26,7 @@ public class UserInfoController {
     private final UserInfoService userInfoService;
     private final UserLoginService userLoginService;
 
+    @ILog
     @Operation(summary = "根据用户名查询用户信息")
     @Parameter(name = "username", description = "用户名")
     @GetMapping("/api/user-service/query")
