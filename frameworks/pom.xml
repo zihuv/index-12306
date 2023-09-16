@@ -22,6 +22,7 @@
         <module>security</module>
         <module>idempotent</module>
         <module>base</module>
+        <module>bizs</module>
     </modules>
 
 </project>
