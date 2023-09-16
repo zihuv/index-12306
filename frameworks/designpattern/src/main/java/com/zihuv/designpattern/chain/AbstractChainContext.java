@@ -1,6 +1,6 @@
 package com.zihuv.designpattern.chain;
 
-import com.zihuv.common.context.ApplicationContextHolder;
+import com.zihuv.base.context.ApplicationContextHolder;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.core.Ordered;
 import org.springframework.util.CollectionUtils;

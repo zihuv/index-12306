@@ -6,18 +6,18 @@ import com.zihuv.userservice.model.param.UserRegisterParam;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.expression.Expression;
+import org.springframework.expression.ExpressionParser;
+import org.springframework.expression.spel.standard.SpelExpressionParser;
 
 @SpringBootTest
 class UserServiceApplicationTests {
-    @Autowired
-    private AbstractChainContext<UserRegisterParam> abstractChainContext;
 
-    @Autowired
-    private CustomIdGenerator customIdGenerator;
     @Test
     void contextLoads() {
-        customIdGenerator.nextId(null);
-        customIdGenerator.nextId(null);
+        ExpressionParser parser = new SpelExpressionParser();
+        Expression exp = parser.parseExpression("'Hello World'.length()");  //使用parseExpression方法来创建一个表达式
+        System.out.println(exp.getValue());
     }
 
 }

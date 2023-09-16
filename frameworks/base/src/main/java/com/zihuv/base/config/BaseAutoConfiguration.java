@@ -10,7 +10,6 @@ import org.springframework.context.annotation.Configuration;
 public class BaseAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean
     public ApplicationContextHolder applicationContextHolder() {
         return new ApplicationContextHolder();
     }
