@@ -1,4 +1,4 @@
-package com.zihuv.common.context;
+package com.zihuv.base.context;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
