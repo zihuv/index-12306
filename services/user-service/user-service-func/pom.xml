@@ -58,6 +58,11 @@
             <artifactId>index12306-log-spring-boot-starter</artifactId>
             <version>${revision}</version>
         </dependency>
+        <dependency>
+            <groupId>com.zihuv.index12306</groupId>
+            <artifactId>index12306-user-spring-boot-starter</artifactId>
+            <version>${revision}</version>
+        </dependency>
     </dependencies>
 
 </project>

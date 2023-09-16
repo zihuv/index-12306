@@ -11,6 +11,7 @@ import java.util.Objects;
 
 @Component
 public class UserRegisterCheckNotNull implements UserRegisterCreateChainFilter<UserRegisterParam> {
+
     @Override
     public void handler(UserRegisterParam requestParam) {
         if (StrUtil.isEmpty(requestParam.getUsername())) {
