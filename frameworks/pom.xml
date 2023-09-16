@@ -20,6 +20,8 @@
         <module>cache</module>
         <module>database</module>
         <module>security</module>
+        <module>idempotent</module>
+        <module>base</module>
     </modules>
 
 </project>
