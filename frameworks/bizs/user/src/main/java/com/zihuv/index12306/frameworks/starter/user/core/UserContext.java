@@ -6,4 +6,6 @@ package com.zihuv.index12306.frameworks.starter.user.core;
 public interface UserContext {
 
     String getUsername();
+
+    Long getUserId();
 }
