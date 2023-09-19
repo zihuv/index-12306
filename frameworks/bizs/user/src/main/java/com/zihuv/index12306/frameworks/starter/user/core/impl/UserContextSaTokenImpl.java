@@ -17,10 +17,20 @@ public class UserContextSaTokenImpl implements UserContext {
 
     @Override
     public String getUsername() {
+        UserInfoDTO userInfo = this.getUserInfo();
+        return userInfo != null ? userInfo.getUsername() : null;
+    }
+
+    @Override
+    public Long getUserId() {
+        UserInfoDTO userInfo = this.getUserInfo();
+        return userInfo != null ? userInfo.getId() : null;
+    }
+
+    private UserInfoDTO getUserInfo() {
         try {
             String userInfoJson = objectMapper.writeValueAsString(StpUtil.getSession().get(SaSession.USER));
-            UserInfoDTO userInfo = objectMapper.readValue(userInfoJson, UserInfoDTO.class);
-            return userInfo != null ? userInfo.getUsername() : null;
+            return objectMapper.readValue(userInfoJson, UserInfoDTO.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
