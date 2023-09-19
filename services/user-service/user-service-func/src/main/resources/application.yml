@@ -56,4 +56,7 @@ feign:
   sentinel:
     enabled: true
 
+sa-token:
+  token-style: simple-uuid
+
 
