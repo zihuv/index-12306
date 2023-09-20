@@ -17,8 +17,6 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class IdempotentParamExecuteHandler extends AbstractIdempotentExecuteHandler implements IdempotentParamService {
 
-    private final
-UserContext userContext;
     private final RedissonClient redissonClient;
 
     private final static String LOCK = "lock:param:restAPI";
@@ -50,7 +48,7 @@ UserContext userContext;
      * @return 当前操作用户 ID
      */
     private Long getCurrentUserId() {
-        return userContext.getUserId();
+        return UserContext.getUserId();
     }
 
     /**

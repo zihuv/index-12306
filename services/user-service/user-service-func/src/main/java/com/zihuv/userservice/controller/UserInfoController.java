@@ -2,9 +2,11 @@ package com.zihuv.userservice.controller;
 
 import com.zihuv.DistributedCache;
 import com.zihuv.convention.result.Result;
+import com.zihuv.idempotent.annotation.Idempotent;
 import com.zihuv.log.annotation.ILog;
 import com.zihuv.userservice.model.entity.UserInfo;
 import com.zihuv.userservice.model.param.UserRegisterParam;
+import com.zihuv.userservice.model.param.UserUpdateParam;
 import com.zihuv.userservice.service.UserInfoService;
 import com.zihuv.userservice.service.UserLoginService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -47,5 +49,14 @@ public class UserInfoController {
         return Result.success();
     }
 
+    /**
+     * 修改用户
+     */
+    @Idempotent
+    @PostMapping("/api/user-service/update")
+    public Result<?> update(@RequestBody UserUpdateParam userUpdateParam) {
+        userLoginService.updateUser(userUpdateParam);
+        return Result.success();
+    }
 
 }
