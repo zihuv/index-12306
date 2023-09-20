@@ -8,7 +8,6 @@ import com.zihuv.idempotent.core.service.paramspel.IdempotentParamSpElExecuteHan
 import com.zihuv.idempotent.core.service.spel.IdempotentSpELByMQExecuteHandler;
 import com.zihuv.idempotent.core.service.spel.IdempotentSpELByRestAPIExecuteHandler;
 import com.zihuv.idempotent.core.service.spel.IdempotentSpELService;
-import com.zihuv.index12306.frameworks.starter.user.core.UserContext;
 import org.redisson.api.RedissonClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -29,8 +28,8 @@ public class IdempotentAutoConfiguration {
      * 参数方式幂等实现，基于 RestAPI 场景
      */
     @Bean
-    public IdempotentParamService idempotentParamService(UserContext userContext, RedissonClient redissonClient) {
-        return new IdempotentParamExecuteHandler(userContext, redissonClient);
+    public IdempotentParamService idempotentParamService(RedissonClient redissonClient) {
+        return new IdempotentParamExecuteHandler(redissonClient);
     }
 
     /**

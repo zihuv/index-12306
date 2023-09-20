@@ -1,11 +1,21 @@
 package com.zihuv.index12306.frameworks.starter.user.core;
 
+import com.zihuv.base.context.ApplicationContextHolder;
+import lombok.RequiredArgsConstructor;
+
 /**
- * 用户上下文
+ * 用户上下文工具类
  */
-public interface UserContext {
+@RequiredArgsConstructor
+public class UserContext {
 
-    String getUsername();
+    private static final IUserContext iUserContext = ApplicationContextHolder.getBean(IUserContext.class);
 
-    Long getUserId();
+    public static String getUsername() {
+        return iUserContext.getUsername();
+    }
+
+    public static Long getUserId() {
+        return iUserContext.getUserId();
+    }
 }

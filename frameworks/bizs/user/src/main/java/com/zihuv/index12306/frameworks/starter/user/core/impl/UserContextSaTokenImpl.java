@@ -4,14 +4,14 @@ import cn.dev33.satoken.session.SaSession;
 import cn.dev33.satoken.stp.StpUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zihuv.index12306.frameworks.starter.user.core.UserContext;
+import com.zihuv.index12306.frameworks.starter.user.core.IUserContext;
 import com.zihuv.index12306.frameworks.starter.user.core.UserInfoDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class UserContextSaTokenImpl implements UserContext {
+public class UserContextSaTokenImpl implements IUserContext {
 
     private final ObjectMapper objectMapper;
 
