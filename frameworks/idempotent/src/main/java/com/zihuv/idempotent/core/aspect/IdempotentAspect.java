@@ -3,9 +3,13 @@ package com.zihuv.idempotent.core.aspect;
 import com.zihuv.idempotent.annotation.Idempotent;
 import com.zihuv.idempotent.core.IdempotentExecuteHandler;
 import com.zihuv.idempotent.core.factory.IdempotentExecuteHandlerFactory;
+import lombok.SneakyThrows;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.reflect.MethodSignature;
+
+import java.lang.reflect.Method;
 
 @Aspect
 public class IdempotentAspect {
@@ -14,7 +18,14 @@ public class IdempotentAspect {
     public Object idempotentHandler(ProceedingJoinPoint joinPoint, Idempotent idempotent) throws Throwable {
         IdempotentExecuteHandler instance = IdempotentExecuteHandlerFactory.getInstance(idempotent.scene(), idempotent.type());
         instance.execute(joinPoint, idempotent);
-        // TODO 对 MQ 消息的幂等性处理
+        // TODO 对 MQ 消息的幂等性处理，以及后置前置方法处理
         return joinPoint.proceed();
+    }
+
+    @SneakyThrows
+    public static Idempotent getIdempotent(ProceedingJoinPoint joinPoint) {
+        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+        Method targetMethod = joinPoint.getTarget().getClass().getDeclaredMethod(methodSignature.getName(), methodSignature.getMethod().getParameterTypes());
+        return targetMethod.getAnnotation(Idempotent.class);
     }
 }
