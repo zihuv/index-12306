@@ -24,4 +24,17 @@ public interface IdempotentExecuteHandler {
      */
     void handler(IdempotentParamWrapper idempotentParam);
 
+    /**
+     * 异常流程处理
+     */
+    default void exceptionProcessing() {
+
+    }
+
+    /**
+     * 后置处理
+     */
+    default void postProcessing() {
+
+    }
 }
