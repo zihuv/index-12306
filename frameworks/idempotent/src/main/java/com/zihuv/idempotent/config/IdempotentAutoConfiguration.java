@@ -3,8 +3,6 @@ package com.zihuv.idempotent.config;
 import com.zihuv.idempotent.core.aspect.IdempotentAspect;
 import com.zihuv.idempotent.core.service.param.IdempotentParamExecuteHandler;
 import com.zihuv.idempotent.core.service.param.IdempotentParamService;
-import com.zihuv.idempotent.core.service.paramspel.IdempotentParamSpELService;
-import com.zihuv.idempotent.core.service.paramspel.IdempotentParamSpElExecuteHandler;
 import com.zihuv.idempotent.core.service.spel.IdempotentSpELByMQExecuteHandler;
 import com.zihuv.idempotent.core.service.spel.IdempotentSpELByRestAPIExecuteHandler;
 import com.zihuv.idempotent.core.service.spel.IdempotentSpELService;
@@ -33,19 +31,11 @@ public class IdempotentAutoConfiguration {
     }
 
     /**
-     * 参数方式和 SpEL 幂等实现，基于 RestAPI 场景
-     */
-    @Bean
-    public IdempotentParamSpELService idempotentParamSpELService() {
-        return new IdempotentParamSpElExecuteHandler();
-    }
-
-    /**
      * SpEL 方式幂等实现，基于 RestAPI 场景
      */
     @Bean
     public IdempotentSpELService idempotentSpELByRestAPIExecuteHandler(RedissonClient redissonClient) {
-        return new IdempotentSpELByRestAPIExecuteHandler();
+        return new IdempotentSpELByRestAPIExecuteHandler(redissonClient);
     }
 
     /**

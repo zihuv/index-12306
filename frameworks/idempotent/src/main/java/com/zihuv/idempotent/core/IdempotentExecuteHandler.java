@@ -20,8 +20,8 @@ public interface IdempotentExecuteHandler {
     /**
      * 幂等处理逻辑（内部处理方法）
      *
-     * @param idempotentParamWrapper 幂等参数
+     * @param idempotentParam 幂等参数
      */
-    void handler(IdempotentParamWrapper idempotentParamWrapper);
+    void handler(IdempotentParamWrapper idempotentParam);
 
 }

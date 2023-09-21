@@ -11,7 +11,7 @@ public class IdempotentSpELByMQExecuteHandler extends AbstractIdempotentExecuteH
     }
 
     @Override
-    public void handler(IdempotentParamWrapper idempotentParamWrapper) {
+    public void handler(IdempotentParamWrapper idempotentParam) {
 
     }
 }
