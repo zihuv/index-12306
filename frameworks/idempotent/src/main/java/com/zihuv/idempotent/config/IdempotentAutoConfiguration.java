@@ -10,6 +10,7 @@ import org.redisson.api.RedissonClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 
 @Configuration
 public class IdempotentAutoConfiguration {
@@ -26,16 +27,16 @@ public class IdempotentAutoConfiguration {
      * 参数方式幂等实现，基于 RestAPI 场景
      */
     @Bean
-    public IdempotentParamService idempotentParamService(RedissonClient redissonClient) {
-        return new IdempotentParamExecuteHandler(redissonClient);
+    public IdempotentParamService idempotentParamService(RedissonClient redissonClient, RedisTemplate<String, Object> redisTemplate) {
+        return new IdempotentParamExecuteHandler(redissonClient, redisTemplate);
     }
 
     /**
      * SpEL 方式幂等实现，基于 RestAPI 场景
      */
     @Bean
-    public IdempotentSpELService idempotentSpELByRestAPIExecuteHandler(RedissonClient redissonClient) {
-        return new IdempotentSpELByRestAPIExecuteHandler(redissonClient);
+    public IdempotentSpELService idempotentSpELByRestAPIExecuteHandler(RedissonClient redissonClient, RedisTemplate<String, Object> redisTemplate) {
+        return new IdempotentSpELByRestAPIExecuteHandler(redissonClient, redisTemplate);
     }
 
     /**

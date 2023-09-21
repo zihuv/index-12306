@@ -7,19 +7,19 @@ import com.zihuv.idempotent.pojo.IdempotentParamWrapper;
 import com.zihuv.index12306.frameworks.starter.user.core.UserContext;
 import lombok.RequiredArgsConstructor;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 @RequiredArgsConstructor
 public class IdempotentParamExecuteHandler extends AbstractIdempotentExecuteHandler implements IdempotentParamService {
 
     private final RedissonClient redissonClient;
-
-    private final static String LOCK = "lock:param:restAPI";
+    private final RedisTemplate<String,Object> redisTemplate;
 
     @Override
     protected String generateLockKey(ProceedingJoinPoint joinPoint) {
@@ -30,8 +30,9 @@ public class IdempotentParamExecuteHandler extends AbstractIdempotentExecuteHand
     @Override
     public void handler(IdempotentParamWrapper idempotentParam) {
         String lockKey = idempotentParam.getLockKey();
-        RLock lock = redissonClient.getLock(lockKey);
-        if (!lock.tryLock()) {
+
+        Boolean isNotExist = redisTemplate.opsForValue().setIfAbsent(lockKey, "", idempotentParam.getIdempotent().keyTimeout(), TimeUnit.SECONDS);
+        if (!Boolean.TRUE.equals(isNotExist)) {
             throw new ClientException(idempotentParam.getIdempotent().message());
         }
     }

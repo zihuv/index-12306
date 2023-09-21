@@ -17,9 +17,18 @@ public class IdempotentAspect {
     @Around("@annotation(idempotent)")
     public Object idempotentHandler(ProceedingJoinPoint joinPoint, Idempotent idempotent) throws Throwable {
         IdempotentExecuteHandler instance = IdempotentExecuteHandlerFactory.getInstance(idempotent.scene(), idempotent.type());
-        instance.execute(joinPoint, idempotent);
-        // TODO 对 MQ 消息的幂等性处理，以及后置前置方法处理
-        return joinPoint.proceed();
+
+        // TODO 对 MQ 消息的幂等性处理
+        Object resultObj;
+        try {
+            instance.execute(joinPoint, idempotent);
+            resultObj = joinPoint.proceed();
+            instance.postProcessing();
+        } catch (Exception e) {
+            instance.exceptionProcessing();
+            throw e;
+        }
+        return resultObj;
     }
 
     @SneakyThrows
