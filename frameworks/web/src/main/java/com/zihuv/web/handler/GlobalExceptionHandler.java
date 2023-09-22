@@ -40,6 +40,13 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = Exception.class)
     public Result<?> defaultErrorHandler(HttpServletRequest request, Exception e) {
+        // 可预料的其它异常
+        if (e.getClass().getName().equals("cn.dev33.satoken.exception.NotLoginException")) {
+            log.error("[{}] {} [ex] {}", request.getMethod(), getUrl(request), e.getMessage());
+            return Result.fail(e.getMessage());
+        }
+
+        // 未预料到的异常
         log.error("[{}] {} ", request.getMethod(), getUrl(request), e);
         return Result.fail(e.getMessage());
     }
