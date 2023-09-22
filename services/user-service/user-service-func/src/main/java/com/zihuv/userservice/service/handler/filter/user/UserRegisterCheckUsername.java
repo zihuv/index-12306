@@ -3,7 +3,7 @@ package com.zihuv.userservice.service.handler.filter.user;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.zihuv.convention.exception.ClientException;
 import com.zihuv.userservice.model.entity.UserInfo;
-import com.zihuv.userservice.model.enums.UserRegisterErrorCodeEnum;
+import com.zihuv.userservice.common.enums.UserRegisterErrorCodeEnum;
 import com.zihuv.userservice.model.param.UserRegisterParam;
 import com.zihuv.userservice.service.UserInfoService;
 import lombok.AllArgsConstructor;

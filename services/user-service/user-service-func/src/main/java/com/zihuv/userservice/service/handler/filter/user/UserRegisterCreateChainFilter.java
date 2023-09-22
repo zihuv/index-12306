@@ -1,7 +1,7 @@
 package com.zihuv.userservice.service.handler.filter.user;
 
 import com.zihuv.designpattern.chain.AbstractChainHandler;
-import com.zihuv.userservice.model.enums.UserChainMarkEnum;
+import com.zihuv.userservice.common.enums.UserChainMarkEnum;
 import com.zihuv.userservice.model.param.UserRegisterParam;
 
 /**
@@ -11,6 +11,6 @@ public interface UserRegisterCreateChainFilter<T extends UserRegisterParam> exte
 
     @Override
     default String mark() {
-        return UserChainMarkEnum.USER_REGISTER_FILTER.name();
+        return UserChainMarkEnum.CHECK_USER_PARAM_FILTER.name();
     }
 }
