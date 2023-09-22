@@ -1,4 +1,4 @@
-package com.zihuv.userservice.model.enums;
+package com.zihuv.userservice.common.enums;
 
 import com.zihuv.convention.errcode.IErrorCode;
 import lombok.AllArgsConstructor;

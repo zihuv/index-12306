@@ -2,10 +2,9 @@ package com.zihuv.userservice.service.handler.filter.user;
 
 import cn.hutool.core.util.StrUtil;
 import com.zihuv.convention.exception.ClientException;
-import com.zihuv.userservice.model.enums.UserRegisterErrorCodeEnum;
+import com.zihuv.userservice.common.enums.UserRegisterErrorCodeEnum;
 import com.zihuv.userservice.model.param.UserRegisterParam;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.util.Objects;
 
