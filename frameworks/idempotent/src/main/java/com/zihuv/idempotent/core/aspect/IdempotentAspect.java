@@ -30,11 +30,4 @@ public class IdempotentAspect {
         }
         return resultObj;
     }
-
-    @SneakyThrows
-    public static Idempotent getIdempotent(ProceedingJoinPoint joinPoint) {
-        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        Method targetMethod = joinPoint.getTarget().getClass().getDeclaredMethod(methodSignature.getName(), methodSignature.getMethod().getParameterTypes());
-        return targetMethod.getAnnotation(Idempotent.class);
-    }
 }

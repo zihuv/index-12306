@@ -16,7 +16,7 @@ public @interface Idempotent {
     /**
      * 设置防重令牌 Key 前缀，MQ 幂等去重可选设置
      */
-    String uniqueKeyPrefix() default "";
+    String uniqueKeyPrefix() default "default";
 
     /**
      * 幂等Key，只有在 {@link Idempotent#type()} 为 {@link IdempotentTypeEnum#SPEL} 时生效
