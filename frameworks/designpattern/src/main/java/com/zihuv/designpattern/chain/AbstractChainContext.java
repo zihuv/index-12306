@@ -42,7 +42,7 @@ public class AbstractChainContext<T> implements CommandLineRunner {
                 abstractChainHandlers = new ArrayList<>();
             }
             abstractChainHandlers.add(bean);
-            // 根据 order 对 value 责任链集合进行排序
+            // 根据 order 对 value 责任链集合进行排序（根据 Order 由小到大排列。执行顺序：1,2,3,4,5）
             List<AbstractChainHandler> actualAbstractChainHandlers = abstractChainHandlers.stream()
                     .sorted(Comparator.comparing(Ordered::getOrder))
                     .collect(Collectors.toList());
