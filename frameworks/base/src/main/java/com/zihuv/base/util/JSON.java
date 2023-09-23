@@ -3,9 +3,11 @@ package com.zihuv.base.util;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.CollectionType;
 import com.zihuv.base.context.ApplicationContextHolder;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -53,10 +55,14 @@ public class JSON {
      * @param json json 字符串
      * @return java.util.List<T> java 集合
      */
-    public static <T> List<T> toList(String json) {
+    public static <T> List<T> toList(String json, Class<T> tClass) {
+        if (json == null) {
+            return new ArrayList<>();
+        }
         try {
-            return objectMapper.readValue(json, new TypeReference<>() {
-            });
+            // 确保 json 能转换成 javabean，而不是 LinkedHashMap
+            CollectionType listType = objectMapper.getTypeFactory().constructCollectionType(ArrayList.class, tClass);
+            return objectMapper.readValue(json, listType);
         } catch (JsonProcessingException e) {
             log.error("json 反序列化为集合错误：{}", json, e);
             return null;
