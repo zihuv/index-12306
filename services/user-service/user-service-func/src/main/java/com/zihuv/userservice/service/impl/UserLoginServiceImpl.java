@@ -7,22 +7,14 @@ import com.zihuv.convention.exception.ClientException;
 import com.zihuv.designpattern.chain.AbstractChainContext;
 import com.zihuv.userservice.mapper.UserLoginMapper;
 import com.zihuv.userservice.model.entity.UserInfo;
-import com.zihuv.userservice.common.enums.UserChainMarkEnum;
 import com.zihuv.userservice.model.param.UserLoginParam;
 import com.zihuv.userservice.model.param.UserRegisterParam;
-import com.zihuv.userservice.model.param.UserUpdateParam;
 import com.zihuv.userservice.model.vo.UserLoginVO;
 import com.zihuv.userservice.service.UserInfoService;
 import com.zihuv.userservice.service.UserLoginService;
 import lombok.RequiredArgsConstructor;
-import org.redisson.api.RBloomFilter;
 import org.redisson.api.RedissonClient;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import static com.zihuv.userservice.common.constant.RedisKeyConstant.USER_REGISTER_REUSE_SHARDING;
-import static com.zihuv.userservice.utils.UserReuseUtil.hashShardingIdx;
 
 @Service
 @RequiredArgsConstructor
