@@ -15,16 +15,14 @@ import com.zihuv.userservice.model.param.UserUpdateParam;
 import com.zihuv.userservice.service.UserInfoService;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RBloomFilter;
-import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
 
 import static com.zihuv.userservice.common.constant.RedisKeyConstant.USER_REGISTER_REUSE_SHARDING;
-import static com.zihuv.userservice.utils.UserReuseUtil.hashShardingIdx;
+import static com.zihuv.userservice.utils.ShardingUtil.hashShardingIdx;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +40,18 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         abstractChainContext.handler(UserChainMarkEnum.CHECK_USER_PARAM_FILTER.name(), userRegisterParam);
 
         UserInfo userInfo = new UserInfo();
-        BeanUtils.copyProperties(userRegisterParam, userInfo);
+        userInfo.setUsername(userRegisterParam.getUsername());
+        userInfo.setRealName(userRegisterParam.getRealName());
+        userInfo.setRegion(userRegisterParam.getRegion());
+        userInfo.setIdType(userRegisterParam.getIdType());
+        userInfo.setIdCard(userRegisterParam.getIdCard());
+        userInfo.setPhone(userRegisterParam.getPhone());
+        userInfo.setTelephone(userRegisterParam.getTelephone());
+        userInfo.setMail(userRegisterParam.getMail());
+        userInfo.setUserType(userRegisterParam.getUserType());
+        userInfo.setVerifyStatus(userRegisterParam.getVerifyState());
+        userInfo.setAddress(userRegisterParam.getAddress());
+        userInfo.setPostCode(userRegisterParam.getPostCode());
 
         this.save(userInfo);
 
