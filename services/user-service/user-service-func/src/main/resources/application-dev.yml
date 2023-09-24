@@ -19,4 +19,4 @@ mybatis-plus:
   configuration:
     mapUnderscoreToCamelCase: true
     # 打印 sql 日志
-    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
