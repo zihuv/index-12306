@@ -1,7 +1,6 @@
 package com.zihuv.base.util;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.zihuv.base.context.ApplicationContextHolder;
@@ -9,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Slf4j
 public class JSON {
@@ -16,7 +16,7 @@ public class JSON {
     private static final ObjectMapper objectMapper = ApplicationContextHolder.getBean(ObjectMapper.class);
 
     /**
-     * 将 object 转换成 json
+     * 将 object 序列化为 json
      *
      * @param object 转换成 json 的数据
      * @return java.lang.String json 字符串
@@ -24,6 +24,13 @@ public class JSON {
     public static String toJsonStr(Object object) {
         if (object == null) {
             return null;
+        }
+        // 集合中不允许出现 null
+        if (object instanceof List<?> list) {
+            if (list.stream().anyMatch(Objects::isNull)) {
+                log.error("json 序列化错误：{}", object);
+                return null;
+            }
         }
         try {
             return objectMapper.writeValueAsString(object);
@@ -52,11 +59,12 @@ public class JSON {
     /**
      * 将 json 反序列化为集合
      *
-     * @param json json 字符串
-     * @return java.util.List<T> java 集合
+     * @param json   json 串
+     * @param tClass 目标数据类型字节码
+     * @return 目标数据类型的集合
      */
     public static <T> List<T> toList(String json, Class<T> tClass) {
-        if (json == null) {
+        if (json == null || "null".equals(json) || "[null]".equals(json)) {
             return new ArrayList<>();
         }
         try {
