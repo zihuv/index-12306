@@ -47,4 +47,9 @@ public class WebAutoConfiguration {
     public InitializeDispatcherServletHandler initializeDispatcherServletHandler(RestTemplate simpleRestTemplate, ConfigurableEnvironment configurableEnvironment) {
         return new InitializeDispatcherServletHandler(simpleRestTemplate, configurableEnvironment);
     }
+
+    @Bean
+    public WebCorsConfiguration webCorsConfiguration() {
+        return new WebCorsConfiguration();
+    }
 }
