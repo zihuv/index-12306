@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.zihuv.index12306</groupId>
+    <artifactId>index-12306</artifactId>
+    <version>1.0</version>
+  </parent>
+  <groupId>com.zihuv.index12306</groupId>
+  <artifactId>services</artifactId>
+  <version>1.0</version>
+  <packaging>pom</packaging>
+  <description>services</description>
+  <modules>
+    <module>user-service</module>
+    <module>gateway-service</module>
+    <module>ticket-service</module>
+  </modules>
+</project>
