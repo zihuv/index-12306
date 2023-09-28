@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
+    <groupId>com.zihuv.index12306</groupId>
+    <artifactId>index-12306</artifactId>
+    <version>1.0</version>
+  </parent>
+  <groupId>com.zihuv.index12306</groupId>
+  <artifactId>frameworks</artifactId>
+  <version>1.0</version>
+  <packaging>pom</packaging>
+  <modules>
+    <module>common</module>
+    <module>log</module>
+    <module>convention</module>
+    <module>web</module>
+    <module>designpattern</module>
+    <module>cache</module>
+    <module>database</module>
+    <module>security</module>
+    <module>idempotent</module>
+    <module>base</module>
+    <module>bizs</module>
+  </modules>
+  <dependencies>
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-autoconfigure</artifactId>
+    </dependency>
+  </dependencies>
+</project>
