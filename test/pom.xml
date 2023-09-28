@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.zihuv.index12306</groupId>
         <artifactId>index-12306</artifactId>
-        <version>1.0</version>
+        <version>${revision}</version>
     </parent>
 
     <artifactId>test</artifactId>
