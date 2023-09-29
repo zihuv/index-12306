@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.zihuv.RedisTemplateProxy;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RedissonClient;
@@ -60,6 +61,7 @@ public class CacheAutoConfiguration {
         objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
         // 将 JSON 转化为 java 对象，而不是转化成 Map 类型
         objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance, ObjectMapper.DefaultTyping.NON_FINAL);
+        objectMapper.registerModule(new JavaTimeModule());
         return new Jackson2JsonRedisSerializer<>(objectMapper, Object.class);
     }
 
