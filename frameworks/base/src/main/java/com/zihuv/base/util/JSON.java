@@ -1,5 +1,6 @@
 package com.zihuv.base.util;
 
+import cn.hutool.core.collection.CollUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
@@ -70,10 +71,11 @@ public class JSON {
         try {
             // 确保 json 能转换成 javabean，而不是 LinkedHashMap
             CollectionType listType = objectMapper.getTypeFactory().constructCollectionType(ArrayList.class, tClass);
-            return objectMapper.readValue(json, listType);
+            List<T> result = objectMapper.readValue(json, listType);
+            return CollUtil.isNotEmpty(result) ? result : new ArrayList<>();
         } catch (JsonProcessingException e) {
             log.error("json 反序列化为集合错误：{}", json, e);
-            return null;
+            return new ArrayList<>();
         }
     }
 }
