@@ -5,6 +5,7 @@ import cn.dev33.satoken.stp.StpUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zihuv.convention.exception.ClientException;
 import com.zihuv.designpattern.chain.AbstractChainContext;
+import com.zihuv.index12306.frameworks.starter.user.core.UserInfoDTO;
 import com.zihuv.userservice.mapper.UserLoginMapper;
 import com.zihuv.userservice.model.entity.UserInfo;
 import com.zihuv.userservice.model.param.UserLoginParam;
@@ -43,9 +44,21 @@ public class UserLoginServiceImpl extends ServiceImpl<UserLoginMapper, UserLogin
         if (userInfo.getId() == null) {
             throw new ClientException("查询不到该用户");
         }
+        // 登录
         StpUtil.login(userInfo.getId());
-        StpUtil.getSession().set(SaSession.USER, userInfo);
-        return null;
+        // 将部分登录信息存储在 SaSession
+        UserInfoDTO userInfoDTO = new UserInfoDTO();
+        userInfoDTO.setId(userInfo.getId());
+        userInfoDTO.setUsername(userInfo.getUsername());
+        StpUtil.getSession().set(SaSession.USER, userInfoDTO);
+
+        UserLoginVO userLoginVO = new UserLoginVO();
+        userLoginVO.setUserId(String.valueOf(userInfo.getId()));
+        userLoginVO.setUsername(userInfo.getUsername());
+        userLoginVO.setRealName(userInfo.getRealName());
+        userLoginVO.setAccessToken(StpUtil.getTokenInfo().getTokenValue());
+
+        return userLoginVO;
     }
 
     @Override
