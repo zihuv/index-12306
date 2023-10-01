@@ -28,6 +28,46 @@
             <artifactId>index12306-database-spring-boot-starter</artifactId>
             <version>${revision}</version>
         </dependency>
+        <dependency>
+            <groupId>com.zihuv.index12306</groupId>
+            <artifactId>index12306-cache-spring-boot-starter</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zihuv.index12306</groupId>
+            <artifactId>index12306-base-spring-boot-starter</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zihuv.index12306</groupId>
+            <artifactId>index12306-idempotent-spring-boot-starter</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zihuv.index12306</groupId>
+            <artifactId>index12306-log-spring-boot-starter</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zihuv.index12306</groupId>
+            <artifactId>index12306-user-spring-boot-starter</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zihuv.index12306</groupId>
+            <artifactId>index12306-designpattern-spring-boot-starter</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zihuv.index12306</groupId>
+            <artifactId>index12306-security-spring-boot-starter</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zihuv.index12306</groupId>
+            <artifactId>index12306-web-spring-boot-starter</artifactId>
+            <version>${revision}</version>
+        </dependency>
     </dependencies>
 
     <build>
