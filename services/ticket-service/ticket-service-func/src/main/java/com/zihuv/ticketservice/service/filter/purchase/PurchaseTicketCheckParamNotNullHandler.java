@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.Objects;
 
 @Component
-public class PurchaseTicketCheckParamNotNull implements PurchaseTicketChainFilter<PurchaseTicketDetailParam>{
+public class PurchaseTicketCheckParamNotNullHandler implements PurchaseTicketChainFilter<PurchaseTicketDetailParam>{
 
     @Override
     public void handler(PurchaseTicketDetailParam requestParam) {

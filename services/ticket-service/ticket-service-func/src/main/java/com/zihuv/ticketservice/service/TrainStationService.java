@@ -18,7 +18,7 @@ public interface TrainStationService extends IService<TrainStation> {
     List<TrainStationVO> listTrainStationVO(String trainId);
 
     /**
-     * 根据列车 id ，查询所有路线
+     * 根据列车 id ，查询该列车的总路线
      *
      * @param trainId   列车 ID
      * @return 列车站点路线关系信息
@@ -26,7 +26,7 @@ public interface TrainStationService extends IService<TrainStation> {
     List<RouteDTO> listTrainStationRoute(String trainId);
 
     /**
-     * 根据列车 id 和出发到达站，查询所有路线
+     * 根据列车 id 和出发到达站，查询该列车这段路程的路线
      *
      * @param trainId   列车 ID
      * @param departure 出发站
