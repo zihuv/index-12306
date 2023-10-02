@@ -4,7 +4,7 @@ import com.zihuv.ticketservice.model.param.PurchaseTicketDetailParam;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PurchaseTicketCheckRepeat implements PurchaseTicketChainFilter<PurchaseTicketDetailParam>{
+public class PurchaseTicketCheckRepeatHandler implements PurchaseTicketChainFilter<PurchaseTicketDetailParam>{
 
     @Override
     public void handler(PurchaseTicketDetailParam requestParam) {

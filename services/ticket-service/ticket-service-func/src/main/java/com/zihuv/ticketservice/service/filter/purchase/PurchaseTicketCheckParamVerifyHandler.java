@@ -25,7 +25,7 @@ import static com.zihuv.ticketservice.common.constant.RedisKeyConstant.TRAIN_STA
 
 @Component
 @RequiredArgsConstructor
-public class PurchaseTicketCheckParamVerify implements PurchaseTicketChainFilter<PurchaseTicketDetailParam> {
+public class PurchaseTicketCheckParamVerifyHandler implements PurchaseTicketChainFilter<PurchaseTicketDetailParam> {
 
     @Value("${spring.profiles.active}")
     private String environment;

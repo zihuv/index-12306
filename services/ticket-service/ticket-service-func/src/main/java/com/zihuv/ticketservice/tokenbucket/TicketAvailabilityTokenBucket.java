@@ -45,7 +45,6 @@ public class TicketAvailabilityTokenBucket {
     private final TrainStationService trainStationService;
     private final SeatService seatService;
 
-    //private static final String LUA_TICKET_AVAILABILITY_TOKEN_BUCKET_PATH = "lua/ticket_availability_token_bucket.lua";
     private static final String LUA_TICKET_AVAILABILITY_TOKEN_BUCKET_PATH = "lua/ticket_availability_token_bucket.lua";
 
     public boolean takeTokenFromBucket(PurchaseTicketDetailParam purchaseTicketDetail) {
