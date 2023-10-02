@@ -19,6 +19,7 @@ public class SeatServiceImpl extends ServiceImpl<SeatMapper, Seat> implements Se
 
     @Override
     public List<SeatTypeCountDTO> listSeatTypeCount(Long trainId, String startStation, String endStation, List<Integer> seatTypes) {
+        // TODO 用常量判断 trainType  List<Integer> seatTypes = VehicleTypeEnum.findSeatTypesByCode(train.getTrainType());
         List<SeatTypeCountDTO> seatTypeCountList = new ArrayList<>();
         for (Integer seatType : seatTypes) {
             LambdaQueryWrapper<Seat> lqw = new LambdaQueryWrapper<>();

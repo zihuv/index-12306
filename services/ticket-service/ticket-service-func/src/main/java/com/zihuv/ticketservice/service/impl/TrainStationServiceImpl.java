@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.zihuv.ticketservice.common.constant.RedisKeyConstant.STATION_INFO;
+import static com.zihuv.ticketservice.common.constant.RedisKeyConstant.TRAIN_PASS_STATION_INFO;
 
 @Service
 @RequiredArgsConstructor
@@ -25,13 +25,13 @@ public class TrainStationServiceImpl extends ServiceImpl<TrainStationMapper, Tra
 
     @Override
     public List<TrainStationVO> listTrainStationVO(String trainId) {
-        String trainStationJson = this.getTrainStationJson(trainId);
+        String trainStationJson = this.getTrainStationJsonByTrainId(trainId);
         return JSON.toList(trainStationJson, TrainStationVO.class);
     }
 
     @Override
     public List<RouteDTO> listTrainStationRoute(String trainId) {
-        String trainStationJson = this.getTrainStationJson(trainId);
+        String trainStationJson = this.getTrainStationJsonByTrainId(trainId);
         return JSON.toList(trainStationJson, RouteDTO.class);
     }
 
@@ -55,8 +55,14 @@ public class TrainStationServiceImpl extends ServiceImpl<TrainStationMapper, Tra
         return passengerRouteList;
     }
 
-    private String getTrainStationJson(String trainId) {
-        return distributedCache.safeGet(STATION_INFO + trainId, String.class, () -> {
+    /**
+     * 根据列车 id 查询该列车的所有会经过的站点
+     *
+     * @param trainId 列车 id
+     * @return java.lang.String 列车经过站点 json
+     */
+    private String getTrainStationJsonByTrainId(String trainId) {
+        return distributedCache.safeGet(TRAIN_PASS_STATION_INFO + trainId, String.class, () -> {
             LambdaQueryWrapper<TrainStation> lqw = new LambdaQueryWrapper<>();
             lqw.eq(TrainStation::getTrainId, trainId);
             List<TrainStation> trainStationList = this.list(lqw);

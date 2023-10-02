@@ -6,7 +6,7 @@ import lombok.Data;
 import com.zihuv.userservice.serialize.IdCardDesensitizationSerializer;
 import com.zihuv.userservice.serialize.PhoneDesensitizationSerializer;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Data
 public class PassengerVO {
@@ -62,7 +62,7 @@ public class PassengerVO {
      * 添加日期
      */
     @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
-    private Date createDate;
+    private LocalDateTime createDate;
 
     /**
      * 审核状态
