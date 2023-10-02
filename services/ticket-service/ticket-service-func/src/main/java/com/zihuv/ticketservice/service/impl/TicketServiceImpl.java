@@ -77,8 +77,8 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
         List<Long> stationIdList = new ArrayList<>();
         for (Object stationId : stationIdSet) {
             // 将 code 转化为名称
-            String toStationName = this.getStationByCode(ticketPageQueryParam.getToStationCode()).getName();
             String fromStationName = this.getStationByCode(ticketPageQueryParam.getFromStationCode()).getName();
+            String toStationName = this.getStationByCode(ticketPageQueryParam.getToStationCode()).getName();
             // 根据名称查询路线
             List<RouteDTO> routeDTOList = trainStationService.listTrainStationRoute(String.valueOf(stationId), fromStationName, toStationName);
             if (CollUtil.isEmpty(routeDTOList)) {
@@ -92,7 +92,11 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
         for (Train train : trains) {
             List<Integer> seatTypes = VehicleTypeEnum.findSeatTypesByCode(train.getTrainType());
             List<SeatTypeCountDTO> seatTypeCountDTOList = seatService.listSeatTypeCount(train.getId(), train.getStartStation(), train.getEndStation(), seatTypes);
-            Duration spendTime = LocalDateTimeUtil.between(train.getDepartureTime(), train.getArrivalTime());
+
+            Duration duration = LocalDateTimeUtil.between(train.getDepartureTime(), train.getArrivalTime());
+            long hours = duration.toHours();
+            long minutes = duration.minusHours(hours).toMinutes();
+            String spendTime = hours + "时" + minutes + "分";
 
             TicketPageQueryVO ticketPageQueryVO = new TicketPageQueryVO();
             ticketPageQueryVO.setTrainId(train.getId());
@@ -106,7 +110,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
             ticketPageQueryVO.setEndRegion(train.getEndRegion());
             ticketPageQueryVO.setDepartureTime(train.getDepartureTime());
             ticketPageQueryVO.setArrivalTime(train.getArrivalTime());
-            ticketPageQueryVO.setSpendTime(spendTime.toString());
+            ticketPageQueryVO.setSpendTime(spendTime);
             ticketPageQueryVO.setSeatTypeCountDTOList(seatTypeCountDTOList);
             ticketPageQueryVOList.add(ticketPageQueryVO);
         }
