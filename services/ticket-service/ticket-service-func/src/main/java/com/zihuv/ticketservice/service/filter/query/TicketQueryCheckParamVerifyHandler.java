@@ -49,7 +49,6 @@ public class TicketQueryCheckParamVerifyHandler implements TicketQueryChainFilte
         }
         // 验证日期是否有效
         LocalDateTime departureDate = LocalDateTimeUtil.parse(requestParam.getDepartureDate(), DatePattern.NORM_DATE_PATTERN);
-        System.out.println(departureDate);
         if (LocalDateTime.now().isAfter(departureDate.plusDays(1))) {
             throw new ClientException("出发日期不能小于当前日期");
         }
