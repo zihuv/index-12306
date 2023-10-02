@@ -12,14 +12,44 @@ public class RedisKeyConstant {
     public static final String STATION_INFO_ALL = "index12306-ticket-service:all_station";
 
     /**
-     * id 为 xxx 车站信息缓存，Key Prefix + 车站ID
+     * 获取全部地点集合 Key
      */
-    public static final String STATION_INFO = "index12306-ticket-service:station:";
+    public static final String QUERY_ALL_REGION_LIST = "index12306-ticket-service:query_all_region_list";
+
+    /**
+     * 地区与站点映射查询
+     */
+    public static final String REGION_TRAIN_STATION_MAPPING = "index12306-ticket-service:region_train_station_mapping";
+
+    /**
+     * 车站 code 和 id 映射查询
+     */
+    public static final String STATION_CODE_ID_MAPPING = "index12306-ticket-service:station_code_id_mapping";
+
+    /**
+     * 获取全部地点集合分布式锁 Key
+     */
+    public static final String LOCK_QUERY_ALL_REGION_LIST = "index12306-ticket-service:lock:query_all_region_list";
+
+    /**
+     * id 为 xxx 列车经过的车站信息缓存，Key Prefix + 列车ID（列车经过的车站）
+     */
+    public static final String TRAIN_PASS_STATION_INFO = "index12306-ticket-service:station:train_id:";
+
+    /**
+     * id 为 xxx 列车车站信息缓存，Key Prefix + 车站ID（车站经过的列车）
+     */
+    public static final String STATION_TRAIN_PASS_SET = "index12306-ticket-service:station:station_id_train_id_mapping:";
 
     /**
      * 列车基本信息，Key Prefix + 列车 ID
      */
     public static final String TRAIN_INFO = "index12306-ticket-service:train_info:";
+
+    /**
+     * 车站基本信息，Key Prefix + 车站 CODE
+     */
+    public static final String TRAIN_STATION_INFO = "index12306-ticket-service:station_info:";
 
     /**
      * 列车路线信息查询，Key Prefix + 列车ID
