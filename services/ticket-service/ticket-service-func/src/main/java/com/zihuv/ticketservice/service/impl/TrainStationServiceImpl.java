@@ -52,6 +52,9 @@ public class TrainStationServiceImpl extends ServiceImpl<TrainStationMapper, Tra
                 break;
             }
         }
+        if (passengerRouteList.get(passengerRouteList.size() - 1).getEndStation() == null) {
+            return new ArrayList<>();
+        }
         return passengerRouteList;
     }
 
