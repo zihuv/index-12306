@@ -27,8 +27,8 @@ import static com.zihuv.ticketservice.common.constant.RedisKeyConstant.TRAIN_STA
 @RequiredArgsConstructor
 public class PurchaseTicketCheckParamVerifyHandler implements PurchaseTicketChainFilter<PurchaseTicketDetailParam> {
 
-    @Value("${spring.profiles.active}")
-    private String environment;
+    @Value("${index-12306.check-purchase-ticket-time:true}")
+    private boolean checkPurchaseTicketTime;
 
     private final DistributedCache distributedCache;
     private final TrainService trainService;
@@ -47,7 +47,7 @@ public class PurchaseTicketCheckParamVerifyHandler implements PurchaseTicketChai
             throw new ClientException("请检查车次是否存在");
         }
         // 开发环境，无视车票时间
-        if (!"dev".equals(environment)) {
+        if (checkPurchaseTicketTime) {
             // 判断当前买票的时间是否有效
             if (LocalDateTime.now().isAfter(train.getSaleTime())) {
                 throw new ClientException("列车车次暂未发售");

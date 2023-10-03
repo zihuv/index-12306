@@ -14,6 +14,8 @@ index-12306:
   check-same-token: false
   # 是否将日志信息添加进数据库
   insert-logs: false
+  # 是否要检验车票的购买时间
+  check-purchase-ticket-time: false
 
 mybatis-plus:
   configuration:
