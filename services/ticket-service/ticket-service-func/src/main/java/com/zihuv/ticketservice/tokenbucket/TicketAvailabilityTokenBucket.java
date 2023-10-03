@@ -5,7 +5,6 @@ import cn.hutool.core.util.StrUtil;
 import com.zihuv.DistributedCache;
 import com.zihuv.base.util.JSON;
 import com.zihuv.ticketservice.common.constant.Index12306Constant;
-import com.zihuv.ticketservice.common.enums.VehicleTypeEnum;
 import com.zihuv.ticketservice.model.dto.PurchaseTicketPassengerDTO;
 import com.zihuv.ticketservice.model.dto.RouteDTO;
 import com.zihuv.ticketservice.model.dto.SeatTypeCountDTO;
@@ -68,13 +67,11 @@ public class TicketAvailabilityTokenBucket {
                 // 再次查看是否存在令牌桶
                 Boolean hasKey2 = distributedCache.hasKey(tokenBucketHashKey);
                 if (!hasKey2) {
-                    // 获取该列车的座位类型（eg：商务座-0、一等座-1、二等座-2）
-                    List<Integer> seatTypes = VehicleTypeEnum.findSeatTypesByCode(train.getTrainType());
                     // <路线_座位类型, 票数>
                     Map<String, Integer> ticketAvailabilityTokenMap = new HashMap<>();
                     for (RouteDTO routeDTO : allRouteList) {
                         // 获取某个路线中的座位类型各售多少票数
-                        List<SeatTypeCountDTO> seatTypeCountList = seatService.listSeatTypeCount(train.getId(), routeDTO.getStartStation(), routeDTO.getEndStation(), seatTypes);
+                        List<SeatTypeCountDTO> seatTypeCountList = seatService.listSeatTypeCount(train.getId(), routeDTO.getStartStation(), routeDTO.getEndStation(), train.getTrainType());
                         // 构建令牌桶
                         for (SeatTypeCountDTO seatTypeCountDTO : seatTypeCountList) {
                             String buildCacheKey = StrUtil.join("_", routeDTO.getStartStation(), routeDTO.getEndStation(), seatTypeCountDTO.getSeatType());
@@ -109,7 +106,7 @@ public class TicketAvailabilityTokenBucket {
             redisScript.setResultType(Long.class);
             return redisScript;
         });
-        Long result = redisTemplate.execute(script, List.of(tokenBucketHashKey, JSON.toJsonStr(bucketMap)),new ArrayList<>());
+        Long result = redisTemplate.execute(script, List.of(tokenBucketHashKey, JSON.toJsonStr(bucketMap)), new ArrayList<>());
         // 若令牌数量充足，lua 脚本将返回 1，代表成功拿到令牌，允许购票
         return result != null && result == 1L;
     }

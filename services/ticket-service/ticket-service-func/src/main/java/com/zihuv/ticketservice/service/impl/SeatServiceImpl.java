@@ -1,9 +1,8 @@
 package com.zihuv.ticketservice.service.impl;
 
-import cn.hutool.core.collection.CollUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zihuv.convention.exception.ServiceException;
+import com.zihuv.ticketservice.common.enums.VehicleTypeEnum;
 import com.zihuv.ticketservice.model.dto.SeatTypeCountDTO;
 import com.zihuv.ticketservice.model.entity.Seat;
 import com.zihuv.ticketservice.service.SeatService;
@@ -12,14 +11,15 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class SeatServiceImpl extends ServiceImpl<SeatMapper, Seat> implements SeatService {
 
     @Override
-    public List<SeatTypeCountDTO> listSeatTypeCount(Long trainId, String startStation, String endStation, List<Integer> seatTypes) {
-        // TODO 用常量判断 trainType  List<Integer> seatTypes = VehicleTypeEnum.findSeatTypesByCode(train.getTrainType());
+    public List<SeatTypeCountDTO> listSeatTypeCount(Long trainId, String startStation, String endStation, Integer trainType) {
+        // 根据列车类型获取乘车座位类型
+        List<Integer> seatTypes = VehicleTypeEnum.findSeatTypesByCode(trainType);
+
         List<SeatTypeCountDTO> seatTypeCountList = new ArrayList<>();
         for (Integer seatType : seatTypes) {
             LambdaQueryWrapper<Seat> lqw = new LambdaQueryWrapper<>();

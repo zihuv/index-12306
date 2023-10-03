@@ -5,11 +5,9 @@ import cn.hutool.core.date.LocalDateTimeUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zihuv.DistributedCache;
-import com.zihuv.base.util.JSON;
 import com.zihuv.convention.exception.ServiceException;
 import com.zihuv.designpattern.chain.AbstractChainContext;
 import com.zihuv.ticketservice.common.enums.TicketChainMarkEnum;
-import com.zihuv.ticketservice.common.enums.VehicleTypeEnum;
 import com.zihuv.ticketservice.model.dto.RouteDTO;
 import com.zihuv.ticketservice.model.dto.SeatTypeCountDTO;
 import com.zihuv.ticketservice.model.entity.Station;
@@ -23,7 +21,6 @@ import com.zihuv.ticketservice.model.vo.TicketPageQueryVO;
 import com.zihuv.ticketservice.service.*;
 import com.zihuv.ticketservice.mapper.TicketMapper;
 import com.zihuv.ticketservice.tokenbucket.TicketAvailabilityTokenBucket;
-import io.lettuce.core.api.sync.RedisCommands;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -90,8 +87,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
         List<TicketPageQueryVO> ticketPageQueryVOList = new ArrayList<>();
         List<Train> trains = trainService.listByIds(stationIdList);
         for (Train train : trains) {
-            List<Integer> seatTypes = VehicleTypeEnum.findSeatTypesByCode(train.getTrainType());
-            List<SeatTypeCountDTO> seatTypeCountDTOList = seatService.listSeatTypeCount(train.getId(), train.getStartStation(), train.getEndStation(), seatTypes);
+            List<SeatTypeCountDTO> seatTypeCountDTOList = seatService.listSeatTypeCount(train.getId(), train.getStartStation(), train.getEndStation(), train.getTrainType());
 
             Duration duration = LocalDateTimeUtil.between(train.getDepartureTime(), train.getArrivalTime());
             long hours = duration.toHours();
