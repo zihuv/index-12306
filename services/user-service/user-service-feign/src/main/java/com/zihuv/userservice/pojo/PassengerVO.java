@@ -1,17 +1,9 @@
-package com.zihuv.userservice.model.vo;
+package com.zihuv.userservice.pojo;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
-import com.zihuv.userservice.serialize.IdCardDesensitizationSerializer;
-import com.zihuv.userservice.serialize.PhoneDesensitizationSerializer;
 
 import java.time.LocalDateTime;
 
-/**
- * 乘车人 VO
- * #{@link com.zihuv.userservice.pojo.PassengerVO}
- */
 @Data
 public class PassengerVO {
 
@@ -38,7 +30,6 @@ public class PassengerVO {
     /**
      * 证件号码
      */
-    @JsonSerialize(using = IdCardDesensitizationSerializer.class)
     private String idCard;
 
     /**
@@ -54,7 +45,6 @@ public class PassengerVO {
     /**
      * 手机号
      */
-    @JsonSerialize(using = PhoneDesensitizationSerializer.class)
     private String phone;
 
     /**
@@ -65,7 +55,6 @@ public class PassengerVO {
     /**
      * 添加日期
      */
-    @JsonFormat(pattern = "yyyy-MM-dd", timezone = "GMT+8")
     private LocalDateTime createDate;
 
     /**

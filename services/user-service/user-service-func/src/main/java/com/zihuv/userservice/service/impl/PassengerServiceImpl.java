@@ -37,7 +37,7 @@ public class PassengerServiceImpl extends ServiceImpl<PassengerMapper, Passenger
     private final RedissonClient redissonClient;
 
     @Override
-    public List<PassengerVO> listPassengerById(Long userId) {
+    public List<PassengerVO> listPassengerVO(Long userId) {
         List<Passenger> passengerList = getPassengerList(userId);
         // 封装 passengerVO 并返回
         return Objects.requireNonNull(passengerList)

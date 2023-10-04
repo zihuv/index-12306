@@ -6,6 +6,7 @@ import com.zihuv.idempotent.enums.IdempotentSceneEnum;
 import com.zihuv.idempotent.enums.IdempotentTypeEnum;
 import com.zihuv.index12306.frameworks.starter.user.core.UserContext;
 import com.zihuv.userservice.common.constant.IdempotentConstant;
+import com.zihuv.userservice.feign.UserPassengerFeign;
 import com.zihuv.userservice.model.param.PassengerParam;
 import com.zihuv.userservice.model.vo.PassengerVO;
 import com.zihuv.userservice.service.PassengerService;
@@ -29,12 +30,13 @@ public class PassengerController {
     private final PassengerService passengerService;
 
     /**
-     * 根据用户的id查询其乘车人列表
+     * 根据 userId 查询其乘车人列表
+     * #{@link UserPassengerFeign}
      */
-    @Operation(summary = "根据用户的id查询其乘车人列表")
+    @Operation(summary = "根据 userId 查询其乘车人列表")
     @GetMapping("/api/user-service/passenger/query")
-    public Result<List<PassengerVO>> listPassengerById() {
-        return Result.success(passengerService.listPassengerById(UserContext.getUserId()));
+    public Result<List<PassengerVO>> listPassengerVO() {
+        return Result.success(passengerService.listPassengerVO(UserContext.getUserId()));
     }
 
     /**

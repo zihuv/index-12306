@@ -37,10 +37,9 @@ public class Passenger extends BaseDO {
     private String idCard;
 
     /**
-     * 优惠类型（eg：学生票）
+     * 优惠类型 0：成人 1：儿童 2：学生 3：残疾军人
      */
     private Integer discountType;
-
 
     /**
      * 手机号

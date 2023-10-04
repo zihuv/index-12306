@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface PassengerService extends IService<Passenger> {
 
-    List<PassengerVO> listPassengerById(Long userId);
+    List<PassengerVO> listPassengerVO(Long userId);
 
     void savePassenger(PassengerParam passengerParam);
 
