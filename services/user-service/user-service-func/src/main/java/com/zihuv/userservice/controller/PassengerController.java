@@ -49,7 +49,7 @@ public class PassengerController {
             scene = IdempotentSceneEnum.RESTAPI,
             message = "正在新增乘车人，请稍后再试..."
     )
-    @Operation(summary = "新增该用户的乘车人列表")
+    @Operation(summary = "新增该用户的乘车人")
     @PostMapping("/api/user-service/passenger/save")
     public Result<?> savePassenger(@RequestBody PassengerParam passengerParam) {
         passengerService.savePassenger(passengerParam);
@@ -77,10 +77,10 @@ public class PassengerController {
     /**
      * 删除乘车人
      */
-    @Operation(summary = "删除乘车人")
+    @Operation(summary = "删除该用户的乘车人")
     @PostMapping("/api/user-service/passenger/delete")
-    public Result<?> deletePassenger(@RequestBody PassengerParam passengerParam) {
-        passengerService.deletePassenger(passengerParam);
+    public Result<?> deletePassenger(String passengerId) {
+        passengerService.deletePassenger(passengerId);
         return Result.success();
     }
 }

@@ -8,7 +8,7 @@ public class PassengerParam {
     /**
      * 乘车人id
      */
-    private String id;
+    private String passengerId;
 
     /**
      * 真实姓名

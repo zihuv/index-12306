@@ -15,5 +15,5 @@ public interface PassengerService extends IService<Passenger> {
 
     void updatePassenger(PassengerParam passengerParam);
 
-    void deletePassenger(PassengerParam passengerParam);
+    void deletePassenger(String passengerId);
 }

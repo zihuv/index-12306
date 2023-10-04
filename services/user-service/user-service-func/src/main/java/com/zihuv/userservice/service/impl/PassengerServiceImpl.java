@@ -15,8 +15,8 @@ import com.zihuv.userservice.model.param.PassengerParam;
 import com.zihuv.userservice.model.vo.PassengerVO;
 import com.zihuv.userservice.service.PassengerService;
 import com.zihuv.userservice.service.UserPassengerService;
-import com.zihuv.userservice.utils.ShardingUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.stereotype.Service;
@@ -26,15 +26,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import static com.zihuv.userservice.common.constant.RedisKeyConstant.PASSENGER_SAVE_LOCK;
 import static com.zihuv.userservice.common.constant.RedisKeyConstant.USER_PASSENGER_LIST;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class PassengerServiceImpl extends ServiceImpl<PassengerMapper, Passenger> implements PassengerService {
 
     private final DistributedCache distributedCache;
-    private final UserPassengerService userPassengerService;
     private final RedissonClient redissonClient;
+    private final UserPassengerService userPassengerService;
 
     @Override
     public List<PassengerVO> listPassengerVO(Long userId) {
@@ -81,17 +83,35 @@ public class PassengerServiceImpl extends ServiceImpl<PassengerMapper, Passenger
         passenger.setPhone(passengerParam.getPhone());
         passenger.setVerifyStatus(VerifyStatusEnum.REVIEWED.getCode());
 
-        try {
-            this.save(passenger);
-        } catch (Exception e) {
-            throw new ServiceException("该乘坐人已经在数据库中存在");
+        // 查询该乘坐人是否已经在数据库中存在。若存在，直接查询拿到 id；不存在，在数据库中添加后，拿到它的 id
+        Long passengerId = -1L;
+        LambdaQueryWrapper<Passenger> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(Passenger::getIdCard, passenger.getIdCard());
+        Passenger passenger1 = this.getOne(lqw);
+        if (passenger1 == null) {
+            // 加分布式锁，保证原子性
+            RLock lock = redissonClient.getLock(PASSENGER_SAVE_LOCK + passenger.getIdCard());
+            lock.lock();
+            try {
+                Passenger passenger2 = this.getOne(lqw);
+                if (passenger2 == null) {
+                    this.save(passenger);
+                    passengerId = passenger.getId();
+                } else {
+                    passengerId = passenger2.getId();
+                }
+            } finally {
+                lock.unlock();
+            }
+        } else {
+            passengerId = passenger1.getId();
         }
 
         // 封装 用户乘车人中间表 并存入数据库
         Long userId = UserContext.getUserId();
         UserPassenger userPassenger = new UserPassenger();
         userPassenger.setUserId(userId);
-        userPassenger.setPassengerId(passenger.getId());
+        userPassenger.setPassengerId(passengerId);
         userPassengerService.save(userPassenger);
         // 删除该用户的乘车人缓存
         distributedCache.delete(USER_PASSENGER_LIST + userId);
@@ -101,16 +121,16 @@ public class PassengerServiceImpl extends ServiceImpl<PassengerMapper, Passenger
     @Override
     public void updatePassenger(PassengerParam passengerParam) {
         Long passengerParamId = null;
-        if (StrUtil.isEmpty(passengerParam.getId())) {
+        if (StrUtil.isEmpty(passengerParam.getPassengerId())) {
             throw new ServiceException("id不能为空");
         }
         if (StrUtil.isEmpty(passengerParam.getIdCard())) {
             throw new ServiceException("证件号码不能为空");
         }
         try {
-            passengerParamId = Long.parseLong(passengerParam.getId());
+            passengerParamId = Long.parseLong(passengerParam.getPassengerId());
         } catch (NumberFormatException e) {
-            throw new ServiceException(StrUtil.format("请求id:[{}]不是纯数字或超过id最大值", passengerParam.getId()));
+            throw new ServiceException(StrUtil.format("请求id:[{}]不是纯数字或超过id最大值", passengerParam.getPassengerId()));
         }
         Passenger passenger = new Passenger();
         passenger.setRealName(passengerParam.getRealName());
@@ -126,10 +146,11 @@ public class PassengerServiceImpl extends ServiceImpl<PassengerMapper, Passenger
     }
 
     @Override
-    public void deletePassenger(PassengerParam passengerParam) {
+    public void deletePassenger(String passengerId) {
         // 删除用户乘车人中间表，而不是乘车人
         LambdaQueryWrapper<UserPassenger> lqw = new LambdaQueryWrapper<>();
-        lqw.eq(UserPassenger::getPassengerId, passengerParam.getId());
+        lqw.eq(UserPassenger::getUserId, UserContext.getUserId());
+        lqw.eq(UserPassenger::getPassengerId, passengerId);
         userPassengerService.remove(lqw);
         distributedCache.delete(USER_PASSENGER_LIST + UserContext.getUserId());
     }
@@ -137,14 +158,15 @@ public class PassengerServiceImpl extends ServiceImpl<PassengerMapper, Passenger
     private List<Passenger> getPassengerList(Long userId) {
         // 查询 passenger json 集合字符串
         String passengerListJson = distributedCache.safeGet(USER_PASSENGER_LIST + userId, String.class, () -> {
-            LambdaQueryWrapper<UserPassenger> upWrapper = new LambdaQueryWrapper<>();
-            upWrapper.eq(UserPassenger::getUserId, userId);
-            List<UserPassenger> userPassengerList = userPassengerService.list(upWrapper);
-
+            LambdaQueryWrapper<UserPassenger> lqw = new LambdaQueryWrapper<>();
+            lqw.eq(UserPassenger::getUserId, userId);
+            List<UserPassenger> userPassengerList = userPassengerService.list(lqw);
             List<Passenger> passengerList = new ArrayList<>();
             for (UserPassenger userPassenger : userPassengerList) {
                 Passenger passenger = this.getById(userPassenger.getPassengerId());
-                passengerList.add(passenger);
+                if (passenger != null) {
+                    passengerList.add(passenger);
+                }
             }
             return JSON.toJsonStr(passengerList);
         });
