@@ -13,12 +13,14 @@ import com.zihuv.userservice.model.param.UserDeletionParam;
 import com.zihuv.userservice.model.param.UserRegisterParam;
 import com.zihuv.userservice.model.param.UserUpdateParam;
 import com.zihuv.userservice.service.UserInfoService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RBloomFilter;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Objects;
 
 import static com.zihuv.userservice.common.constant.RedisKeyConstant.USER_REGISTER_REUSE_SHARDING;
@@ -60,6 +62,21 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
         userRegisterCachePenetrationBloomFilter.add(username);
         // 将用户名分片，存储到 redis 当中
         redisTemplate.opsForSet().add(USER_REGISTER_REUSE_SHARDING + hashShardingIdx(username), username);
+    }
+
+    /**
+     * 初始化用户名的布隆过滤器和用户名缓存
+     */
+    @PostConstruct
+    public void initBloomFilter() {
+        LambdaQueryWrapper<UserInfo> lqw = new LambdaQueryWrapper<>();
+        lqw.select(UserInfo::getUsername);
+        List<UserInfo> usernameList = this.list(lqw);
+        for (UserInfo usernameInfo : usernameList) {
+            String username = usernameInfo.getUsername();
+            userRegisterCachePenetrationBloomFilter.add(username);
+            redisTemplate.opsForSet().add(USER_REGISTER_REUSE_SHARDING + hashShardingIdx(username), username);
+        }
     }
 
     @Transactional(rollbackFor = Exception.class)
