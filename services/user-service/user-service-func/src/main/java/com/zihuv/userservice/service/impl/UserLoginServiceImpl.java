@@ -44,6 +44,9 @@ public class UserLoginServiceImpl extends ServiceImpl<UserLoginMapper, UserLogin
         if (userInfo.getId() == null) {
             throw new ClientException("查询不到该用户");
         }
+        if (!userInfo.getPassword().equals(userLoginParam.getPassword())) {
+            throw new ClientException("密码错误");
+        }
         // 登录
         StpUtil.login(userInfo.getId());
         // 将部分登录信息存储在 SaSession

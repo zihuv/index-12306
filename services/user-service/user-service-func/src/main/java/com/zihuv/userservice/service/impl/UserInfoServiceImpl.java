@@ -43,6 +43,7 @@ public class UserInfoServiceImpl extends ServiceImpl<UserInfoMapper, UserInfo> i
 
         UserInfo userInfo = new UserInfo();
         userInfo.setUsername(userRegisterParam.getUsername());
+        userInfo.setPassword(userRegisterParam.getPassword());
         userInfo.setRealName(userRegisterParam.getRealName());
         userInfo.setRegion(userRegisterParam.getRegion());
         userInfo.setIdType(userRegisterParam.getIdType());

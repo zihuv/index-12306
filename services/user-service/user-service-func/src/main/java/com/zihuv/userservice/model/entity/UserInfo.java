@@ -18,6 +18,11 @@ public class UserInfo extends BaseDO {
     private String username;
 
     /**
+     * 密码
+     */
+    private String password;
+
+    /**
      * 真实姓名
      */
     private String realName;
