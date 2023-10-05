@@ -17,8 +17,13 @@ index-12306:
   # 是否要检验车票的购买时间
   check-purchase-ticket-time: false
 
+# 打印 open-feign 日志
+logging:
+  level:
+    com.zihuv.userservice.feign.UserPassengerFeign: debug
+
 mybatis-plus:
   configuration:
     mapUnderscoreToCamelCase: true
     # 打印 sql 日志
-   # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

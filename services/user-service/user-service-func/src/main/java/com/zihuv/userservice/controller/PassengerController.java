@@ -4,7 +4,6 @@ import com.zihuv.convention.result.Result;
 import com.zihuv.idempotent.annotation.Idempotent;
 import com.zihuv.idempotent.enums.IdempotentSceneEnum;
 import com.zihuv.idempotent.enums.IdempotentTypeEnum;
-import com.zihuv.index12306.frameworks.starter.user.core.UserContext;
 import com.zihuv.userservice.common.constant.IdempotentConstant;
 import com.zihuv.userservice.feign.UserPassengerFeign;
 import com.zihuv.userservice.model.param.PassengerParam;
@@ -14,10 +13,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -35,8 +31,8 @@ public class PassengerController {
      */
     @Operation(summary = "根据 userId 查询其乘车人列表")
     @GetMapping("/api/user-service/passenger/query")
-    public Result<List<PassengerVO>> listPassengerVO() {
-        return Result.success(passengerService.listPassengerVO(UserContext.getUserId()));
+    public Result<List<PassengerVO>> listPassengerVO(@RequestParam("userId") String userId) {
+        return Result.success(passengerService.listPassengerVO(Long.parseLong(userId)));
     }
 
     /**

@@ -4,6 +4,8 @@ import com.zihuv.convention.result.Result;
 import com.zihuv.userservice.pojo.PassengerVO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
@@ -11,6 +13,5 @@ import java.util.List;
 public interface UserPassengerFeign {
 
     @GetMapping("/api/user-service/passenger/query")
-    Result<List<PassengerVO>> listPassengerVO();
-
+    Result<List<PassengerVO>> listPassengerVO(@RequestParam("userId") String userId);
 }
