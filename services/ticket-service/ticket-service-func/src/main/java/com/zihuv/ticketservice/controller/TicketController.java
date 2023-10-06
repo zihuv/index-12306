@@ -6,9 +6,9 @@ import com.zihuv.idempotent.enums.IdempotentSceneEnum;
 import com.zihuv.idempotent.enums.IdempotentTypeEnum;
 import com.zihuv.log.annotation.ILog;
 import com.zihuv.ticketservice.common.constant.IdempotentConstant;
-import com.zihuv.ticketservice.model.param.PurchaseTicketDetailParam;
+import com.zihuv.ticketservice.model.param.TicketPurchaseDetailParam;
 import com.zihuv.ticketservice.model.param.TicketPageQueryParam;
-import com.zihuv.ticketservice.model.vo.TicketOrderDetailVO;
+import com.zihuv.ticketservice.model.vo.TicketPurchaseVO;
 import com.zihuv.ticketservice.model.vo.TicketPageQueryVO;
 import com.zihuv.ticketservice.service.TicketService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -51,7 +51,7 @@ public class TicketController {
     )
     @Operation(summary = "购买车票")
     @PostMapping("/api/ticket-service/ticket/purchase")
-    public Result<TicketOrderDetailVO> purchaseTickets(@RequestBody PurchaseTicketDetailParam purchaseTicket) {
+    public Result<TicketPurchaseVO> purchaseTickets(@RequestBody TicketPurchaseDetailParam purchaseTicket) {
         return Result.success(ticketService.purchaseTickets(purchaseTicket));
     }
 }

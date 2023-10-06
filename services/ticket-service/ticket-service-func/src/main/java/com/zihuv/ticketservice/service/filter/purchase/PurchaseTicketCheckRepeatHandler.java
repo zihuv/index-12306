@@ -1,13 +1,13 @@
 package com.zihuv.ticketservice.service.filter.purchase;
 
-import com.zihuv.ticketservice.model.param.PurchaseTicketDetailParam;
+import com.zihuv.ticketservice.model.param.TicketPurchaseDetailParam;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PurchaseTicketCheckRepeatHandler implements PurchaseTicketChainFilter<PurchaseTicketDetailParam>{
+public class PurchaseTicketCheckRepeatHandler implements PurchaseTicketChainFilter<TicketPurchaseDetailParam>{
 
     @Override
-    public void handler(PurchaseTicketDetailParam requestParam) {
+    public void handler(TicketPurchaseDetailParam requestParam) {
         // TODO 重复购买校验
     }
 

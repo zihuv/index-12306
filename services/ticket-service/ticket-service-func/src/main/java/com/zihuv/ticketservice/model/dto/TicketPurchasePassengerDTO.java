@@ -6,7 +6,7 @@ import lombok.Data;
  * 购票乘车人信息
  */
 @Data
-public class PurchaseTicketPassengerDTO {
+public class TicketPurchasePassengerDTO {
 
     /**
      * 乘车人 ID
@@ -17,4 +17,9 @@ public class PurchaseTicketPassengerDTO {
      * 座位类型
      */
     private Integer seatType;
+
+    /**
+     * 选择座位（eg：A,B,C,D ）
+     */
+    private Character chooseSeat;
 }

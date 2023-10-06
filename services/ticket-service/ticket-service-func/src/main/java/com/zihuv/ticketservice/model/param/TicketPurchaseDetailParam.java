@@ -1,6 +1,6 @@
 package com.zihuv.ticketservice.model.param;
 
-import com.zihuv.ticketservice.model.dto.PurchaseTicketPassengerDTO;
+import com.zihuv.ticketservice.model.dto.TicketPurchasePassengerDTO;
 import lombok.Data;
 
 import java.util.List;
@@ -9,23 +9,17 @@ import java.util.List;
  * 购票请求参数
  */
 @Data
-public class PurchaseTicketDetailParam {
+public class TicketPurchaseDetailParam {
 
     /**
      * 车次 ID
      */
     private String trainId;
 
-
     /**
      * 乘车人
      */
-    private List<PurchaseTicketPassengerDTO> passengers;
-
-    /**
-     * 选择座位
-     */
-    private List<String> chooseSeats;
+    private List<TicketPurchasePassengerDTO> passengers;
 
     /**
      * 出发站点

@@ -18,7 +18,7 @@ public class PassengerVO {
     /**
      * 乘车人id
      */
-    private String id;
+    private String passengerId;
 
     /**
      * 用户名

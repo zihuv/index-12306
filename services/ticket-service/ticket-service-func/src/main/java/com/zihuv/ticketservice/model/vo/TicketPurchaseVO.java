@@ -5,7 +5,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class PurchaseTicketVO {
+public class TicketPurchaseVO {
 
     /**
      * 订单号

@@ -46,7 +46,7 @@ public class PassengerServiceImpl extends ServiceImpl<PassengerMapper, Passenger
                 .stream()
                 .map(passenger -> {
                     PassengerVO passengerVO = new PassengerVO();
-                    passengerVO.setId(String.valueOf(passenger.getId()));
+                    passengerVO.setPassengerId(String.valueOf(passenger.getId()));
                     passengerVO.setRealName(passenger.getRealName());
                     passengerVO.setIdType(passenger.getIdType());
                     passengerVO.setIdCard(passenger.getIdCard());

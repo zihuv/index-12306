@@ -1,15 +1,15 @@
-package com.zihuv.ticketservice.tokenbucket;
+package com.zihuv.ticketservice.service.tokenbucket;
 
 import cn.hutool.core.lang.Singleton;
 import cn.hutool.core.util.StrUtil;
 import com.zihuv.DistributedCache;
 import com.zihuv.base.util.JSON;
 import com.zihuv.ticketservice.common.constant.Index12306Constant;
-import com.zihuv.ticketservice.model.dto.PurchaseTicketPassengerDTO;
+import com.zihuv.ticketservice.model.dto.TicketPurchasePassengerDTO;
 import com.zihuv.ticketservice.model.dto.RouteDTO;
 import com.zihuv.ticketservice.model.dto.SeatTypeCountDTO;
 import com.zihuv.ticketservice.model.entity.Train;
-import com.zihuv.ticketservice.model.param.PurchaseTicketDetailParam;
+import com.zihuv.ticketservice.model.param.TicketPurchaseDetailParam;
 import com.zihuv.ticketservice.service.SeatService;
 import com.zihuv.ticketservice.service.TrainService;
 import com.zihuv.ticketservice.service.TrainStationService;
@@ -46,7 +46,7 @@ public class TicketAvailabilityTokenBucket {
 
     private static final String LUA_TICKET_AVAILABILITY_TOKEN_BUCKET_PATH = "lua/ticket_availability_token_bucket.lua";
 
-    public boolean takeTokenFromBucket(PurchaseTicketDetailParam purchaseTicketDetail) {
+    public boolean takeTokenFromBucket(TicketPurchaseDetailParam purchaseTicketDetail) {
         // 查询列车
         Train train = distributedCache.safeGet(
                 TRAIN_INFO + purchaseTicketDetail.getTrainId(),
@@ -85,8 +85,12 @@ public class TicketAvailabilityTokenBucket {
             }
         }
         // 获取乘坐人购买的座位票数，确定需要领取的令牌数 eg：二等座，两张票
-        List<SeatTypeCountDTO> seatTypeCountList = purchaseTicketDetail.getPassengers().stream()
-                .collect(Collectors.groupingBy(PurchaseTicketPassengerDTO::getSeatType, Collectors.counting())).entrySet().stream()
+        List<SeatTypeCountDTO> seatTypeCountList = purchaseTicketDetail
+                .getPassengers()
+                .stream()
+                .collect(Collectors.groupingBy(TicketPurchasePassengerDTO::getSeatType, Collectors.counting()))
+                .entrySet()
+                .stream()
                 .map(entry -> new SeatTypeCountDTO(entry.getKey(), Math.toIntExact(entry.getValue())))
                 .toList();
         // 乘客所购买的路段
