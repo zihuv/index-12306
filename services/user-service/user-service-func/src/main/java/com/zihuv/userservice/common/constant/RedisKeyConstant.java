@@ -20,5 +20,10 @@ public class RedisKeyConstant {
      */
     public static final String USER_PASSENGER_LIST = "index12306-user-service:user-passenger-list:";
 
-    //public static final String USER
+
+
+    /**
+     * 添加乘车人锁，Key Prefix + id card
+     */
+    public static final String PASSENGER_SAVE_LOCK = "index12306-user-service:passenger_save_lock:";
 }

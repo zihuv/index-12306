@@ -65,4 +65,9 @@ public class RedisKeyConstant {
      * 列车购买令牌桶加载数据 Key
      */
     public static final String LOCK_TICKET_AVAILABILITY_TOKEN_BUCKET = "index12306-ticket-service:lock:ticket_availability_token_bucket:%s";
+
+    /**
+     * 列车座位令牌桶，Key Prefix + 列车ID （key-value：车厢号_座位号_出发站_到达站, 空座位 => 01_01A_北京南_济南西, 1l）列车id:{}:路线:{}:座位类型:{}:车厢:{}:< 座位，为空>
+     */
+    public static final String SEAT_BUCKET = "index12306-ticket-service:seat_bucket:train_id:{}:route:{}:seat_type:{}:carriage:{}";
 }

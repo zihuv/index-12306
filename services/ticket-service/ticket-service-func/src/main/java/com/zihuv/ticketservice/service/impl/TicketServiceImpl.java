@@ -7,27 +7,33 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zihuv.DistributedCache;
 import com.zihuv.convention.exception.ServiceException;
 import com.zihuv.designpattern.chain.AbstractChainContext;
+import com.zihuv.ticketservice.common.constant.Index12306Constant;
 import com.zihuv.ticketservice.common.enums.TicketChainMarkEnum;
 import com.zihuv.ticketservice.model.dto.RouteDTO;
 import com.zihuv.ticketservice.model.dto.SeatTypeCountDTO;
+import com.zihuv.ticketservice.model.dto.TicketPurchaseDTO;
+import com.zihuv.ticketservice.model.vo.TicketOrderDetailVO;
 import com.zihuv.ticketservice.model.entity.Station;
 import com.zihuv.ticketservice.model.entity.Ticket;
 import com.zihuv.ticketservice.model.entity.Train;
 import com.zihuv.ticketservice.model.entity.TrainStation;
-import com.zihuv.ticketservice.model.param.PurchaseTicketDetailParam;
+import com.zihuv.ticketservice.model.param.TicketPurchaseDetailParam;
 import com.zihuv.ticketservice.model.param.TicketPageQueryParam;
-import com.zihuv.ticketservice.model.vo.TicketOrderDetailVO;
+import com.zihuv.ticketservice.model.vo.TicketPurchaseVO;
 import com.zihuv.ticketservice.model.vo.TicketPageQueryVO;
 import com.zihuv.ticketservice.service.*;
 import com.zihuv.ticketservice.mapper.TicketMapper;
-import com.zihuv.ticketservice.tokenbucket.TicketAvailabilityTokenBucket;
+import com.zihuv.ticketservice.service.select.TrainSeatTypeSelector;
+import com.zihuv.ticketservice.service.tokenbucket.TicketAvailabilityTokenBucket;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static com.zihuv.ticketservice.common.constant.RedisKeyConstant.*;
 
@@ -41,8 +47,9 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
     private final StationService stationService;
     private final TrainStationService trainStationService;
     private final SeatService seatService;
+    private final TrainSeatTypeSelector trainSeatTypeSelector;
     private final AbstractChainContext<TicketPageQueryParam> ticketPageQueryAbstractChainContext;
-    private final AbstractChainContext<PurchaseTicketDetailParam> purchaseTicketAbstractChainContext;
+    private final AbstractChainContext<TicketPurchaseDetailParam> purchaseTicketAbstractChainContext;
     private final TicketAvailabilityTokenBucket ticketAvailabilityTokenBucket;
 
     @Override
@@ -98,7 +105,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
             ticketPageQueryVO.setTrainId(train.getId());
             ticketPageQueryVO.setTrainNumber(train.getTrainNumber());
             ticketPageQueryVO.setTrainType(train.getTrainType());
-            ticketPageQueryVO.setTrainTag(Integer.parseInt(train.getTrainTag()));
+            ticketPageQueryVO.setTrainTag(train.getTrainTag());
             ticketPageQueryVO.setTrainBrand(train.getTrainBrand());
             ticketPageQueryVO.setStartStation(train.getStartStation());
             ticketPageQueryVO.setEndStation(train.getEndStation());
@@ -114,13 +121,59 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
     }
 
     @Override
-    public TicketOrderDetailVO purchaseTickets(PurchaseTicketDetailParam purchaseTicket) {
+    public TicketPurchaseVO purchaseTickets(TicketPurchaseDetailParam requestParam) {
         // 责任链模式，验证 1：参数不为空 2：参数是否有效 3：乘客是否重复买票
-        purchaseTicketAbstractChainContext.handler(TicketChainMarkEnum.TRAIN_PURCHASE_TICKET_FILTER.name(), purchaseTicket);
-        boolean tokenResult = ticketAvailabilityTokenBucket.takeTokenFromBucket(purchaseTicket);
+        purchaseTicketAbstractChainContext.handler(TicketChainMarkEnum.TRAIN_PURCHASE_TICKET_FILTER.name(), requestParam);
+        // 从令牌桶中获取买票资格
+        boolean tokenResult = ticketAvailabilityTokenBucket.takeTokenFromBucket(requestParam);
         if (!tokenResult) {
-            throw new ServiceException("列车站点已无余票");
+            throw new ServiceException("该座位类型已无余票");
         }
+        // 挑选座位
+        List<TicketPurchaseDTO> selectSeat = trainSeatTypeSelector.select(requestParam);
+        System.out.println(selectSeat);
+        // 对座位类型映射
+
+        // 对座位加锁，防止同个座位被超卖
+
+        // 发生异常，回滚令牌桶中的令牌
+
+        return null;
+    }
+
+    @Transactional(rollbackFor = Throwable.class)
+    public TicketPurchaseVO executePurchaseTickets(TicketPurchaseDetailParam requestParam) {
+        // 记录车票订单
+        List<TicketOrderDetailVO> ticketOrderDetailResults = new ArrayList<>();
+        // 查询列车信息
+        String trainId = requestParam.getTrainId();
+        Train train = distributedCache.safeGet(
+                TRAIN_INFO + trainId,
+                Train.class,
+                () -> trainService.getById(trainId),
+                Index12306Constant.ADVANCE_TICKET_DAY,
+                TimeUnit.DAYS);
+        // 挑选座位
+
+        // 创建订单
+
+        // 封装参数
+//        TicketPurchaseVO ticketPurchaseVO = new TicketPurchaseVO();
+//        ticketPurchaseVO.setOrderSn();
+//        ticketPurchaseVO.setTicketOrderDetails();
+//
+//        TicketOrderDetailVO ticketOrderDetailVO = new TicketOrderDetailVO();
+//        ticketOrderDetailVO.setSeatType();
+//        ticketOrderDetailVO.setCarriageNumber();
+//        ticketOrderDetailVO.setSeatNumber();
+//        ticketOrderDetailVO.setRealName();
+//        ticketOrderDetailVO.setIdType();
+//        ticketOrderDetailVO.setIdCard();
+//        ticketOrderDetailVO.setTicketType();
+//        ticketOrderDetailVO.setAmount();
+
+
+
         return null;
     }
 

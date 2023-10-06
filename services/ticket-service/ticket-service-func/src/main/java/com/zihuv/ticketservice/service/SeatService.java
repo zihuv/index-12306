@@ -18,4 +18,15 @@ public interface SeatService extends IService<Seat> {
      * @return java.util.List<com.zihuv.ticketservice.model.dto.SeatTypeCountDTO>
      */
     List<SeatTypeCountDTO> listSeatTypeCount(Long trainId, String startStation, String endStation, Integer trainType);
+
+    /**
+     * 根据列车 id 和座位类型座位，查询空座位
+     *
+     * @param trainId  列车 id
+     * @param seatType 座位类型
+     * @return 座位集合
+     */
+    List<Seat> listEmptySeatByTrainIdAndSeatType(String trainId, Integer seatType);
+
+    List<Seat> listEmptySeatAllByTrainId(String trainId);
 }
