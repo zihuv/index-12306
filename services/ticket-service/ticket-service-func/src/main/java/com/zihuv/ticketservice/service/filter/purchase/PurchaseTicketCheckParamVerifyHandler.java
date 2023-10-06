@@ -1,17 +1,24 @@
 package com.zihuv.ticketservice.service.filter.purchase;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.zihuv.DistributedCache;
 import com.zihuv.base.util.JSON;
 import com.zihuv.convention.exception.ClientException;
+import com.zihuv.index12306.frameworks.starter.user.core.UserContext;
 import com.zihuv.ticketservice.common.constant.Index12306Constant;
+import com.zihuv.ticketservice.common.enums.VehicleTypeEnum;
+import com.zihuv.ticketservice.model.dto.TicketPurchasePassengerDTO;
 import com.zihuv.ticketservice.model.entity.Train;
 import com.zihuv.ticketservice.model.entity.TrainStation;
-import com.zihuv.ticketservice.model.param.PurchaseTicketDetailParam;
+import com.zihuv.ticketservice.model.param.TicketPurchaseDetailParam;
 import com.zihuv.ticketservice.service.TrainService;
 import com.zihuv.ticketservice.service.TrainStationService;
+import com.zihuv.userservice.feign.UserPassengerFeign;
+import com.zihuv.userservice.pojo.PassengerVO;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -23,9 +30,10 @@ import java.util.concurrent.TimeUnit;
 import static com.zihuv.ticketservice.common.constant.RedisKeyConstant.TRAIN_INFO;
 import static com.zihuv.ticketservice.common.constant.RedisKeyConstant.TRAIN_STATION_STOPOVER_DETAIL;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-public class PurchaseTicketCheckParamVerifyHandler implements PurchaseTicketChainFilter<PurchaseTicketDetailParam> {
+public class PurchaseTicketCheckParamVerifyHandler implements PurchaseTicketChainFilter<TicketPurchaseDetailParam> {
 
     @Value("${index-12306.check-purchase-ticket-time:true}")
     private boolean checkPurchaseTicketTime;
@@ -33,9 +41,10 @@ public class PurchaseTicketCheckParamVerifyHandler implements PurchaseTicketChai
     private final DistributedCache distributedCache;
     private final TrainService trainService;
     private final TrainStationService trainStationService;
+    private final UserPassengerFeign userPassengerFeign;
 
     @Override
-    public void handler(PurchaseTicketDetailParam requestParam) {
+    public void handler(TicketPurchaseDetailParam requestParam) {
         // 查询该车次是否存在
         Train train = distributedCache.safeGet(
                 TRAIN_INFO + requestParam.getTrainId(),
@@ -78,8 +87,35 @@ public class PurchaseTicketCheckParamVerifyHandler implements PurchaseTicketChai
                 requestParam.getArrival()
         );
         if (!validateStation) {
-            throw new ClientException("列车车站数据错误");
+            throw new ClientException(StrUtil.format("该列车并没有从[{}]至[{}]的路线", requestParam.getDeparture(), requestParam.getArrival()));
         }
+        // 校验这些乘车人是否被该用户添加
+        List<PassengerVO> passengerList = userPassengerFeign.listPassengerVO(String.valueOf(UserContext.getUserId())).getData();
+        if (CollUtil.isEmpty(passengerList)) {
+            throw new ClientException("该用户并没有添加乘车人");
+        }
+        for (PassengerVO passenger : passengerList) {
+            for (TicketPurchasePassengerDTO requestParamPassenger : requestParam.getPassengers()) {
+                if (!requestParamPassenger.getPassengerId().equals(passenger.getPassengerId())) {
+                    throw new ClientException("该乘车人并未被添加到该用户当中");
+                }
+            }
+        }
+        // 校验乘坐人所选的座位类型是否在该列车中存在
+        List<Integer> seatTypesByCode = VehicleTypeEnum.findSeatTypesByCode(train.getTrainType());
+        for (TicketPurchasePassengerDTO passenger : requestParam.getPassengers()) {
+            boolean hasSeatTypeInTrain = false;
+            for (Integer seatType : seatTypesByCode) {
+                if (passenger.getSeatType().equals(seatType)) {
+                    hasSeatTypeInTrain = true;
+                    break;
+                }
+            }
+            if (!hasSeatTypeInTrain) {
+                throw new ClientException("该列车并没有您所选的座位类型");
+            }
+        }
+
     }
 
     @Override
