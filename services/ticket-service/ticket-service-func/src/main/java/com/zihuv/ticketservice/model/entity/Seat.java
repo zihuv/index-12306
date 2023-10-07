@@ -35,6 +35,11 @@ public class Seat extends BaseDO implements Serializable {
     private String seatNumber;
 
     /**
+     * 座位英文代号（A,B,C）
+     */
+    private String seatLetter;
+
+    /**
      * 座位类型
      */
     private Integer seatType;

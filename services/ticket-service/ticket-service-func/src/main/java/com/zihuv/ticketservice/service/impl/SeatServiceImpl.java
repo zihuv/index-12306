@@ -10,7 +10,9 @@ import com.zihuv.ticketservice.mapper.SeatMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 import static com.zihuv.ticketservice.common.constant.Index12306Constant.SEAT_IS_NOT_OCCUPIED;
 
@@ -42,7 +44,7 @@ public class SeatServiceImpl extends ServiceImpl<SeatMapper, Seat> implements Se
     }
 
     @Override
-    public List<Seat> listEmptySeatByTrainIdAndSeatType(String trainId, Integer seatType) {
+    public List<Seat> listSeatByTrainIdAndSeatType(String trainId, Integer seatType) {
         LambdaQueryWrapper<Seat> lqw = new LambdaQueryWrapper<>();
         lqw.eq(Seat::getTrainId, trainId);
         lqw.eq(Seat::getSeatType, seatType);
@@ -51,11 +53,27 @@ public class SeatServiceImpl extends ServiceImpl<SeatMapper, Seat> implements Se
     }
 
     @Override
-    public List<Seat> listEmptySeatAllByTrainId(String trainId) {
+    public List<Seat> listSeatAllByTrainId(String trainId) {
         LambdaQueryWrapper<Seat> lqw = new LambdaQueryWrapper<>();
         lqw.eq(Seat::getTrainId, trainId);
         lqw.eq(Seat::getSeatStatus, SEAT_IS_NOT_OCCUPIED);
         return this.list(lqw);
+    }
+
+    @Override
+    public List<String> listSeatCarriageByTrainIdAndSeatType(String trainId, Integer seatType) {
+        LambdaQueryWrapper<Seat> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(Seat::getTrainId, trainId);
+        lqw.eq(Seat::getSeatStatus, SEAT_IS_NOT_OCCUPIED);
+        lqw.eq(Seat::getSeatType, seatType);
+        lqw.select(Seat::getCarriageNumber);
+        List<Seat> seatList = this.list(lqw);
+
+        Set<String> seatCarriageList = new LinkedHashSet<>();
+        for (Seat seat : seatList) {
+            seatCarriageList.add(seat.getCarriageNumber());
+        }
+        return new ArrayList<>(seatCarriageList);
     }
 
 }

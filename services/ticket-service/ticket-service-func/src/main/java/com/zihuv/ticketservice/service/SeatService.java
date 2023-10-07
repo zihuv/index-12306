@@ -20,13 +20,28 @@ public interface SeatService extends IService<Seat> {
     List<SeatTypeCountDTO> listSeatTypeCount(Long trainId, String startStation, String endStation, Integer trainType);
 
     /**
-     * 根据列车 id 和座位类型座位，查询空座位
+     * 根据列车 id 和座位类型座位，查询座位
      *
      * @param trainId  列车 id
      * @param seatType 座位类型
      * @return 座位集合
      */
-    List<Seat> listEmptySeatByTrainIdAndSeatType(String trainId, Integer seatType);
+    List<Seat> listSeatByTrainIdAndSeatType(String trainId, Integer seatType);
 
-    List<Seat> listEmptySeatAllByTrainId(String trainId);
+    /**
+     * 根据列车 id ，查询所有座位
+     *
+     * @param trainId 列车 id
+     * @return 座位集合
+     */
+    List<Seat> listSeatAllByTrainId(String trainId);
+
+    /**
+     * 根据列车 id 和座位类型，查询所有车厢
+     *
+     * @param trainId  列车 id
+     * @param seatType 座位类型
+     * @return 列车车厢
+     */
+    List<String> listSeatCarriageByTrainIdAndSeatType(String trainId, Integer seatType);
 }
