@@ -34,6 +34,7 @@ public class InitialSeatDataTest {
                         seat.setCarriageNumber("0" + carriageNumber);
                         // 01A B C D F - 06
                         seat.setSeatNumber("0" + seatNumberCode + (char) ('A' + seatNumberLetter));
+                        seat.setSeatLetter(String.valueOf((char) ('A' + seatNumberLetter)));
                         seat.setSeatType(2);
                         seat.setStartStation(routeDTO.getStartStation());
                         seat.setEndStation(routeDTO.getEndStation());
@@ -44,7 +45,6 @@ public class InitialSeatDataTest {
                 }
             }
         }
-
 
 
     }
