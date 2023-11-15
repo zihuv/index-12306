@@ -5,11 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.zihuv.index12306</groupId>
-        <artifactId>index12306-order-service</artifactId>
+        <artifactId>index12306-ticket-service</artifactId>
         <version>${revision}</version>
     </parent>
 
-    <artifactId>index12306-order-service-feign</artifactId>
+    <artifactId>index12306-ticket-service-feign</artifactId>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
