@@ -40,13 +40,15 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(value = Exception.class)
     public Result<?> defaultErrorHandler(HttpServletRequest request, Exception e) {
-        // 可预料的其它异常
+        // 可预料的异常
         if (e.getClass().getName().equals("cn.dev33.satoken.exception.NotLoginException")) {
             log.error("[{}] {} [ex] {}", request.getMethod(), getUrl(request), e.getMessage());
+        } else if (e.getClass().getName().equals("org.springframework.web.bind.MethodArgumentNotValidException")) {
+            log.error("[{}] {} [ex] {}", request.getMethod(), getUrl(request), e.getMessage());
+        } else {
+            // 未预料到的异常
+            log.error("[{}] {} ", request.getMethod(), getUrl(request), e);
         }
-
-        // 未预料到的异常
-        log.error("[{}] {} ", request.getMethod(), getUrl(request), e);
         return Result.fail(e.getMessage());
     }
 
