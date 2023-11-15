@@ -53,7 +53,7 @@ public class JSON {
             return objectMapper.readValue(json, tClass);
         } catch (JsonProcessingException e) {
             log.error("json 反序列化错误：{}", json, e);
-            return null;
+            throw new IllegalArgumentException("JSON反序列化错误", e);
         }
     }
 
