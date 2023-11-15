@@ -14,9 +14,22 @@ index-12306:
   check-same-token: false
   # 是否将日志信息添加进数据库
   insert-logs: false
+  # 订单号尾号生成策略：userId - 用户 id 后六位；random - 六位随机数
+  tail-number-strategy: random
 
 mybatis-plus:
   configuration:
     mapUnderscoreToCamelCase: true
     # 打印 sql 日志
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+# 支付
+pay:
+  alipay:
+    appId: 9021000131670832
+    privateKey: MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCE9rt9cSzDylU+fyQCzhB2QJI07L+0b1RRojPU4SSKs+uOpFHMpmeqRKwCnIAnLOKH1DQrYPSMmKtq/JOoI4wTJCRytyOl0Z34xjyao3OlL8zWxST9OO2TMrKH1KJbz5Zd5n/AgTYqbAqe/og4wzMTbjPBr7EFE7HrM5WqDC/L9/Vym2z6rY/7tAa7h489ufieAPr8mVQ1mXxtRXMzzBaStHw+l8kUw+hLUa1VncM5jUNQfo9s1Dqa7NRe2IseHEwS2ig34nTnqA2E4T/L6NgahlyuaZFulVDRRQ/nrazCJbEaDRdvuJt7zjjOC1Me9OK/il8w5PB6vHKzwv6B/3TVAgMBAAECggEAaQXN//5FwnxtqoiYNBL5k73a/izGG0oYSsaYtBwFVf1ZIPkPl1sU5LuLNiDRZKAiafEmJ+FUKD1qoH3ST2uMd44DsAyR/qa8ZUSHmAllDePcowNi/RRbKvpPY9SDTYuBFLg8zhwBYa6nEQCxLkyYak+QV/tjEkSFMucy3vbzReJxVGoNKd/G4AiqvhWgza68PgcOQOMHCWhblBxfA2OdXXz6NHYMihmeaZr1DMDasDiVgbOkrmwtXQ6Ojab93P40zDgFBf3WaWfgoPqYRGmfPIClxcQU1KaTXdgNP2ZcD9n3n8q5EdXy9lVmUQrTCWWr7eKofKBayaDQrB096Bj3IQKBgQDmzYjyMDTpr66QPO/VXTMZ7Was1v3t/7w9u7k30uXczEIGbRoalxYgIs1+M/X0NEFuDOTQIp6MaUe9/tFfIMF5QrlXK316axfWdrnXGsySCP6xNHiD1q9jj0fHFtJSRliCbn4bszfTGJZ392cOH6LH2cSz7DFoUS6+GwRiMAD7GQKBgQCTesv60EM+w/C3yQZDCXPYXursmUEiviS2GTqY4MAVNAf3iOGFFks94Mp+tG5o7Uty28pWzrpgjzj+AMV+eDVuoaMbi9f+BDM7IYs56bsuj++FvZ2UzDV4DJEbk+qSvJ25QIhoF8LLmcdlGT20t+e/Qs//iDZL+0Qs5P5baO57HQKBgEL+YATkp0c5nnLxrTACmIWrGkWLNjPyKmLE7bNdfSlFBNk2rAAR4PM9BubeEENtM5zNE1Gy6tCY8qEcqQtyx5X6HzBFSGvTUB0JY1IjzkOJZtxq/ZxPIaPFgDEy16PYFXLuvZ4uvEKC/ZIe9wPrfOWDuYv8QC8meWnnD7OseWxpAoGAVWXMyc5gse6J7BIWcyj9ELRdumU/x1ttLJjNSosSDvUTC+4SEJuJNCp/dwEJ0e5eOwM0VjHc0F7+tG5D7eizn/0u0puWlbte4wWYdg922Q51tu7GWcwpxfsY52wub4uSlRveINBpdrX0NQF5rrSzGBgbEy+PqU20+34aH1pSha0CgYEAgroNsJfbIs1ajXH3LqzL6MfZ8H7dMEQ0obtN5qdeR5MrYhjahd9MGZn37X32i8AvWpgfhXMmWn9aQoEyexhNL6AV9R893LXGkV1fJo1IYPuARWZ/ywVK+E5BfPLcgKLw9ztBB6RM7FedsNdiZ31bUUvEJDG6BgO8Vk1k4dsUGR0=
+    alipay-public-key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqV2llOGaXwTyA0nlY5FOzQbqnt54/3l3b4/6D6Gj+VuNgrvCJ3uUeuQTR9uP3g8NaKwnSWWG9+WEyte6Aepu2U+QBmcAnfhUU+Tikp3kz2ylM6nn0EXztbLwtF6SgmvmCy+o5UJKmsfZmOq2WjC36hqit5tJGYGrcRblIzdETz1lwup7OAklubDZNCOGILzHalmS9N83NaUUljJuyjlj/y++VKo3ljV+qhN7cypAKj7ps7W5/euQI29xgR9sPEb6pkdbuuzDK3dq5Nsg8X8+77VljSK9FXMVYt9SkVYQ/WhHhR6VHJmeZtiTnqWo9tQk+iF1CezhJyem4QzDX1TdMQIDAQAB
+    server-url: https://openapi-sandbox.dl.alipaydev.com/gateway.do
+    return-url: https://www.baidu.com
+    notify-url: http://47.120.9.134:8848/api/pay-service/notify
+

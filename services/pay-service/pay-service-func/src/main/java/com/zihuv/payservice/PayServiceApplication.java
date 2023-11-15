@@ -15,5 +15,4 @@ public class PayServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(PayServiceApplication.class, args);
     }
-
 }

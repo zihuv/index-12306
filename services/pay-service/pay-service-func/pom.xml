@@ -69,6 +69,11 @@
             <artifactId>index12306-base-spring-boot-starter</artifactId>
             <version>${revision}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.alipay.sdk</groupId>
+            <artifactId>alipay-sdk-java</artifactId>
+        </dependency>
     </dependencies>
 
 </project>
