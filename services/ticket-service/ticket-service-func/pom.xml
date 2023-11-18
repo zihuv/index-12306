@@ -73,6 +73,16 @@
             <artifactId>index12306-user-service-feign</artifactId>
             <version>${revision}</version>
         </dependency>
+        <dependency>
+            <groupId>com.zihuv.index12306</groupId>
+            <artifactId>index12306-ticket-service-feign</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zihuv.index12306</groupId>
+            <artifactId>index12306-order-service-feign</artifactId>
+            <version>${revision}</version>
+        </dependency>
     </dependencies>
 
     <build>
