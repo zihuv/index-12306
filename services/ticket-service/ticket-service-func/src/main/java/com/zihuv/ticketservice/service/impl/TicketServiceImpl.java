@@ -7,6 +7,8 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zihuv.DistributedCache;
 import com.zihuv.convention.exception.ServiceException;
 import com.zihuv.designpattern.chain.AbstractChainContext;
+import com.zihuv.orderservice.feign.OrderFeign;
+import com.zihuv.orderservice.model.param.TicketOrderCreateParam;
 import com.zihuv.ticketservice.common.constant.Index12306Constant;
 import com.zihuv.ticketservice.common.enums.TicketChainMarkEnum;
 import com.zihuv.ticketservice.model.dto.RouteDTO;
@@ -43,6 +45,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
 
     private final DistributedCache distributedCache;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final OrderFeign orderFeign;
     private final TrainService trainService;
     private final StationService stationService;
     private final TrainStationService trainStationService;
@@ -58,19 +61,8 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
         // 责任链模式：1.各个参数不能为空 2.出发日期不能小于当前日期 3.添加所有地区与车站的缓存，并校验这些名称是否真实存在
         ticketPageQueryAbstractChainContext.handler(TicketChainMarkEnum.TRAIN_QUERY_FILTER.name(), ticketPageQueryParam);
 
-        // 将车站 code 转换为车站 id
-        if (!redisTemplate.opsForHash().hasKey(STATION_CODE_ID_MAPPING, ticketPageQueryParam.getFromStationCode()) ||
-                !redisTemplate.opsForHash().hasKey(STATION_CODE_ID_MAPPING, ticketPageQueryParam.getToStationCode())) {
-            Station fromStation = this.getStationByCode(ticketPageQueryParam.getFromStationCode());
-            Station toStation = this.getStationByCode(ticketPageQueryParam.getToStationCode());
-
-            Map<String, Long> stationCodeAndIdMapping = new HashMap<>();
-            stationCodeAndIdMapping.put(fromStation.getCode(), fromStation.getId());
-            stationCodeAndIdMapping.put(toStation.getCode(), toStation.getId());
-            redisTemplate.opsForHash().putAll(STATION_CODE_ID_MAPPING, stationCodeAndIdMapping);
-        }
-        long stationFromId = Long.parseLong(String.valueOf(redisTemplate.opsForHash().get(STATION_CODE_ID_MAPPING, ticketPageQueryParam.getFromStationCode())));
-        long stationToId = Long.parseLong(String.valueOf(redisTemplate.opsForHash().get(STATION_CODE_ID_MAPPING, ticketPageQueryParam.getToStationCode())));
+        long stationFromId = Long.parseLong(String.valueOf(this.getStationByStationName(ticketPageQueryParam.getDeparture()).getId()));
+        long stationToId = Long.parseLong(String.valueOf(this.getStationByStationName(ticketPageQueryParam.getArrival()).getId()));
 
         // 使用 redis 对出发站和目标站的列车 id 取交集，获取可以直达的列车 id
         Set<Object> stationIdSet = redisTemplate.opsForSet().intersect(STATION_TRAIN_PASS_SET + stationFromId, STATION_TRAIN_PASS_SET + stationToId);
@@ -81,8 +73,8 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
         List<Long> stationIdList = new ArrayList<>();
         for (Object stationId : stationIdSet) {
             // 将 code 转化为名称
-            String fromStationName = this.getStationByCode(ticketPageQueryParam.getFromStationCode()).getName();
-            String toStationName = this.getStationByCode(ticketPageQueryParam.getToStationCode()).getName();
+            String fromStationName = ticketPageQueryParam.getDeparture();
+            String toStationName = ticketPageQueryParam.getArrival();
             // 根据名称查询路线
             List<RouteDTO> routeDTOList = trainStationService.listTrainStationRoute(String.valueOf(stationId), fromStationName, toStationName);
             if (CollUtil.isEmpty(routeDTOList)) {
@@ -111,8 +103,8 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
             ticketPageQueryVO.setEndStation(train.getEndStation());
             ticketPageQueryVO.setStartRegion(train.getStartRegion());
             ticketPageQueryVO.setEndRegion(train.getEndRegion());
-            ticketPageQueryVO.setDepartureTime(train.getDepartureTime());
-            ticketPageQueryVO.setArrivalTime(train.getArrivalTime());
+            ticketPageQueryVO.setDepartureTime(String.valueOf(train.getDepartureTime()));
+            ticketPageQueryVO.setArrivalTime(String.valueOf(train.getArrivalTime()));
             ticketPageQueryVO.setSpendTime(spendTime);
             ticketPageQueryVO.setSeatTypeCountDTOList(seatTypeCountDTOList);
             ticketPageQueryVOList.add(ticketPageQueryVO);
@@ -125,18 +117,61 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
         // 责任链模式，验证 1：参数不为空 2：参数是否有效 3：乘客是否重复买票
         purchaseTicketAbstractChainContext.handler(TicketChainMarkEnum.TRAIN_PURCHASE_TICKET_FILTER.name(), requestParam);
         // 从令牌桶中获取买票资格
+        // TODO 当座位字母代号已售尽时，是使用随机分配票，还是需要拿到 token 的
         boolean tokenResult = ticketAvailabilityTokenBucket.takeTokenFromBucket(requestParam);
         if (!tokenResult) {
             throw new ServiceException("该座位类型已无余票");
         }
         // 挑选座位
         List<TicketPurchaseDTO> selectSeat = trainSeatTypeSelector.select(requestParam);
+
         System.out.println(selectSeat);
         // 对座位类型映射
 
         // 对座位加锁，防止同个座位被超卖
 
         // 发生异常，回滚令牌桶中的令牌
+
+        Train train = distributedCache.safeGet(
+                TRAIN_INFO + requestParam.getTrainId(),
+                Train.class,
+                () -> trainService.getById(requestParam.getTrainId()),
+                Index12306Constant.ADVANCE_TICKET_DAY,
+                TimeUnit.DAYS);
+
+        List<TicketOrderDetailVO> ticketOrderDetailVOList = new ArrayList<>();
+        for (TicketPurchaseDTO ticketPurchaseDTO : selectSeat) {
+            // 封装 VO
+            TicketOrderDetailVO ticketOrderDetailVO = new TicketOrderDetailVO();
+            ticketOrderDetailVO.setSeatType(ticketPurchaseDTO.getSeatType());
+            ticketOrderDetailVO.setCarriageNumber(ticketPurchaseDTO.getCarriageNumber());
+            ticketOrderDetailVO.setSeatNumber(ticketPurchaseDTO.getSeatNumber());
+            ticketOrderDetailVO.setRealName(ticketPurchaseDTO.getRealName());
+            ticketOrderDetailVO.setIdType(ticketPurchaseDTO.getIdType());
+            ticketOrderDetailVO.setIdCard(ticketPurchaseDTO.getIdCard());
+            // TODO 成人票/学生票 涉及算费
+            // ticketOrderDetailVO.setTicketType();
+            // ticketOrderDetailVO.setAmount();
+            ticketOrderDetailVOList.add(ticketOrderDetailVO);
+
+            // 封装订单
+            TicketOrderCreateParam ticketOrderCreateParam = new TicketOrderCreateParam();
+            ticketOrderCreateParam.setUserId(Long.parseLong(ticketPurchaseDTO.getPassengerId()));
+            ticketOrderCreateParam.setRealName(ticketPurchaseDTO.getRealName());
+            ticketOrderCreateParam.setTrainId(Long.parseLong(requestParam.getTrainId()));
+            ticketOrderCreateParam.setTrainNumber(ticketPurchaseDTO.getCarriageNumber());
+            ticketOrderCreateParam.setDeparture(requestParam.getDeparture());
+            ticketOrderCreateParam.setArrival(requestParam.getArrival());
+            ticketOrderCreateParam.setDepartureTime(train.getDepartureTime());
+            ticketOrderCreateParam.setArrivalTime(train.getArrivalTime());
+            // 发送创建订单请求
+            orderFeign.createOrder(ticketOrderCreateParam);
+        }
+
+        // TODO 一个订单代表多个乘车人的订单？
+        TicketPurchaseVO ticketPurchaseVO = new TicketPurchaseVO();
+        ticketPurchaseVO.setOrderSn(null);
+        ticketPurchaseVO.setTicketOrderDetails(ticketOrderDetailVOList);
 
         return null;
     }
@@ -173,7 +208,6 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
 //        ticketOrderDetailVO.setAmount();
 
 
-
         return null;
     }
 
@@ -199,19 +233,19 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
     /**
      * 查询车站并添加其缓存
      *
-     * @param code 车站 code
+     * @param stationName 车站名称
      * @return 车站
      */
-    private Station getStationByCode(String code) {
-        Station station = distributedCache.get(TRAIN_STATION_INFO + code, Station.class);
+    private Station getStationByStationName(String stationName) {
+        Station station = distributedCache.get(TRAIN_STATION_INFO + stationName, Station.class);
         if (station == null) {
             LambdaQueryWrapper<Station> lqw = new LambdaQueryWrapper<>();
-            lqw.eq(Station::getCode, code);
+            lqw.eq(Station::getName, stationName);
             station = this.stationService.getOne(lqw);
             if (station == null) {
-                throw new ServiceException("该车站 code 不存在");
+                throw new ServiceException("该车站不存在");
             }
-            distributedCache.put(TRAIN_STATION_INFO + code, station);
+            distributedCache.put(TRAIN_STATION_INFO + stationName, station);
         }
         return station;
     }

@@ -12,10 +12,10 @@ import org.springframework.stereotype.Component;
 public class TicketQueryCheckParamNotNullHandler implements TicketQueryChainFilter<TicketPageQueryParam> {
     @Override
     public void handler(TicketPageQueryParam requestParam) {
-        if (StrUtil.isBlank(requestParam.getFromStationCode())) {
+        if (StrUtil.isBlank(requestParam.getDeparture())) {
             throw new ClientException("出发地不能为空");
         }
-        if (StrUtil.isBlank(requestParam.getToStationCode())) {
+        if (StrUtil.isBlank(requestParam.getArrival())) {
             throw new ClientException("目的地不能为空");
         }
         if (StrUtil.isBlank(requestParam.getDepartureDate())) {

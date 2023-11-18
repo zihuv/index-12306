@@ -47,7 +47,7 @@ public class RedisKeyConstant {
     public static final String TRAIN_INFO = "index12306-ticket-service:train_info:";
 
     /**
-     * 车站基本信息，Key Prefix + 车站 CODE
+     * 车站基本信息，Key Prefix + 车站名称
      */
     public static final String TRAIN_STATION_INFO = "index12306-ticket-service:station_info:";
 

@@ -57,12 +57,12 @@ public class TicketPageQueryVO {
     /**
      * 出发时间
      */
-    private LocalDateTime departureTime;
+    private String departureTime;
 
     /**
      * 到达时间
      */
-    private LocalDateTime arrivalTime;
+    private String arrivalTime;
 
     /**
      * 全程花费时间

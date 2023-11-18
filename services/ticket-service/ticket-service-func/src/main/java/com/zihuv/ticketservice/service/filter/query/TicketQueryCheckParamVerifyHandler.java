@@ -98,7 +98,7 @@ public class TicketQueryCheckParamVerifyHandler implements TicketQueryChainFilte
     private long getEmptyCacheCount(TicketPageQueryParam requestParam) {
         List<Object> existList = redisTemplate.opsForHash().multiGet(
                 QUERY_ALL_REGION_LIST,
-                ListUtil.toList(requestParam.getFromStationCode(), requestParam.getToStationCode()));
+                ListUtil.toList(requestParam.getDeparture(), requestParam.getArrival()));
         return existList.stream().filter(Objects::isNull).count();
     }
 

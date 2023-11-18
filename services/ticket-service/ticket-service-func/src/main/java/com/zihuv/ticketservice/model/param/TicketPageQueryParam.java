@@ -7,14 +7,14 @@ import lombok.Data;
 public class TicketPageQueryParam {
 
     /**
-     * 出发地 Code
+     * 出发地
      */
-    private String fromStationCode;
+    private String departure;
 
     /**
-     * 目的地 Code
+     * 目的地
      */
-    private String toStationCode;
+    private String arrival;
 
     /**
      * 出发日期
