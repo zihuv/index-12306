@@ -1,6 +1,5 @@
 package com.zihuv.payservice.service.impl;
 
-import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSONObject;
@@ -12,20 +11,16 @@ import com.alipay.api.request.*;
 import com.alipay.api.response.*;
 import com.zihuv.base.util.JSON;
 import com.zihuv.convention.exception.ServiceException;
-import com.zihuv.index12306.frameworks.starter.user.core.UserContext;
 import com.zihuv.payservice.config.AliPayProperties;
 import com.zihuv.payservice.model.dto.*;
 import com.zihuv.payservice.model.param.PayParam;
 import com.zihuv.payservice.service.PayService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
 @Service
@@ -35,37 +30,14 @@ public class AliPayServiceImpl implements PayService {
     private final AliPayProperties aliPayProperties;
     private final AlipayClient alipayClient;
 
-    @Value("${index-12306.tail-number-strategy:userId}")
-    private String tailNumberStrategy;
-
     private static final String SUCCESS = "success";
     private static final String FAIL = "fail";
 
-    private String getOrderNo() {
-        // 日期。如：231114
-        String date = LocalDateTimeUtil.format(LocalDateTime.now(), "yyMMdd");
-        // 时间戳。一天 86400000 毫秒，计算后缩短订单号长度
-        String timestamp = String.valueOf(System.currentTimeMillis() % 86400000);
-        // 尾号
-        String tailNumber = "000000";
-        if ("userId".equals(tailNumberStrategy)) {
-            // 用户 id
-            tailNumber = String.valueOf(UserContext.getUserId() % 10000);
-        } else if ("random".equals(tailNumberStrategy)) {
-            // 随机数
-            int min = 100000;
-            int max = 999999;
-            tailNumber = String.valueOf(ThreadLocalRandom.current().nextInt(min, max + 1));
-        }
-        return date + timestamp + tailNumber;
-    }
 
     @Override
-    public String pay(PayParam payParam) {
-        String orderNo = this.getOrderNo();
-
+    public void createPayPage(PayParam payParam) {
         PayDTO payDTO = new PayDTO();
-        payDTO.setOrderNo(orderNo);
+        payDTO.setOrderNo(payParam.getOrderNo());
         payDTO.setPrice(payParam.getPrice());
         payDTO.setSubject(payParam.getSubject());
         payDTO.setGoodsDetail(payParam.getGoodsDetail());
@@ -80,13 +52,12 @@ public class AliPayServiceImpl implements PayService {
         try {
             AlipayTradePagePayResponse response = alipayClient.pageExecute(request);
             if (!response.isSuccess()) {
-                throw new ServiceException("alipay 支付失败！订单号：" + orderNo);
+                throw new ServiceException("alipay 支付失败！订单号：" + payParam.getOrderNo());
             }
             FileUtil.writeString(response.getBody(), "C:\\Users\\10413\\Desktop\\temp\\ali.html", StandardCharsets.UTF_8);
         } catch (AlipayApiException e) {
             throw new RuntimeException(e);
         }
-        return orderNo;
     }
 
     @Override

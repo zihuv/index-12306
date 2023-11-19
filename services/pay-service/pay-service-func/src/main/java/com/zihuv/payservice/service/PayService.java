@@ -8,10 +8,8 @@ public interface PayService {
 
     /**
      * 支付
-     *
-     * @return orderNo 订单号
      */
-    String pay(PayParam payParam);
+    void createPayPage(PayParam payParam);
 
     /**
      * 取消订单

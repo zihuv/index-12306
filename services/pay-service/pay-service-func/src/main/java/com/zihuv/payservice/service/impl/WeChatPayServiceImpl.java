@@ -12,9 +12,8 @@ import java.util.Map;
 public class WeChatPayServiceImpl implements PayService {
 
     @Override
-    public String pay(PayParam payParam) {
+    public void createPayPage(PayParam payParam) {
         System.out.println("微信——支付");
-        return "微信——支付";
     }
 
     @Override

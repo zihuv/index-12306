@@ -9,6 +9,8 @@ import java.util.List;
 @Data
 public class PayParam {
 
+    private String orderNo;
+
     @NotBlank(message = "支付方式不能为空")
     private String payCode;
 

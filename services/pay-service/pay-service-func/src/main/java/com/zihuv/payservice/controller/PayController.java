@@ -31,12 +31,12 @@ public class PayController {
      * @param payParam 支付参数
      * @return com.zihuv.convention.result.Result<?>
      */
-    @Operation(summary = "支付")
+    @Operation(summary = "创建支付页面")
     @PostMapping("/api/pay-service/pay")
-    public Result<?> pay(@Valid @RequestBody PayParam payParam) {
+    public Result<?> createPayPage(@Valid @RequestBody PayParam payParam) {
         PayService payService = payStrategyContext.getPayService(payParam.getPayCode());
-        String orderNo = payService.pay(payParam);
-        return Result.success(orderNo);
+        payService.createPayPage(payParam);
+        return Result.success();
     }
 
     /**
