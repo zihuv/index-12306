@@ -35,6 +35,8 @@ public class TicketController {
     @Operation(summary = "查询车票")
     @PostMapping("/api/ticket-service/ticket/query")
     public Result<List<TicketPageQueryVO>> pageListTicketQuery(@RequestBody TicketPageQueryParam ticketPageQueryParam) {
+        // TODO 查询各车站有多少票数
+        // TODO 第一次查询会出现 出发地或目的地不存在
         return Result.success(ticketService.pageTicketQuery(ticketPageQueryParam));
     }
 

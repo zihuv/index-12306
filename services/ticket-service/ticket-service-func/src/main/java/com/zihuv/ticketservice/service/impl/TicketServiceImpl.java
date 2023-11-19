@@ -2,10 +2,12 @@ package com.zihuv.ticketservice.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zihuv.DistributedCache;
 import com.zihuv.convention.exception.ServiceException;
+import com.zihuv.convention.result.Result;
 import com.zihuv.designpattern.chain.AbstractChainContext;
 import com.zihuv.orderservice.feign.OrderFeign;
 import com.zihuv.orderservice.model.param.TicketOrderCreateParam;
@@ -141,19 +143,6 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
 
         List<TicketOrderDetailVO> ticketOrderDetailVOList = new ArrayList<>();
         for (TicketPurchaseDTO ticketPurchaseDTO : selectSeat) {
-            // 封装 VO
-            TicketOrderDetailVO ticketOrderDetailVO = new TicketOrderDetailVO();
-            ticketOrderDetailVO.setSeatType(ticketPurchaseDTO.getSeatType());
-            ticketOrderDetailVO.setCarriageNumber(ticketPurchaseDTO.getCarriageNumber());
-            ticketOrderDetailVO.setSeatNumber(ticketPurchaseDTO.getSeatNumber());
-            ticketOrderDetailVO.setRealName(ticketPurchaseDTO.getRealName());
-            ticketOrderDetailVO.setIdType(ticketPurchaseDTO.getIdType());
-            ticketOrderDetailVO.setIdCard(ticketPurchaseDTO.getIdCard());
-            // TODO 成人票/学生票 涉及算费
-            // ticketOrderDetailVO.setTicketType();
-            // ticketOrderDetailVO.setAmount();
-            ticketOrderDetailVOList.add(ticketOrderDetailVO);
-
             // 封装订单
             TicketOrderCreateParam ticketOrderCreateParam = new TicketOrderCreateParam();
             ticketOrderCreateParam.setUserId(Long.parseLong(ticketPurchaseDTO.getPassengerId()));
@@ -165,15 +154,29 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
             ticketOrderCreateParam.setDepartureTime(train.getDepartureTime());
             ticketOrderCreateParam.setArrivalTime(train.getArrivalTime());
             // 发送创建订单请求
-            orderFeign.createOrder(ticketOrderCreateParam);
+            Result<String> orderResponse = orderFeign.createOrder(ticketOrderCreateParam);
+            if (StrUtil.isBlank(orderResponse.getData())) {
+                throw new ServiceException("订单号为空");
+            }
+
+            // 封装 VO
+            TicketOrderDetailVO ticketOrderDetailVO = new TicketOrderDetailVO();
+            ticketOrderDetailVO.setOrderNo(orderResponse.getData());
+            ticketOrderDetailVO.setSeatType(ticketPurchaseDTO.getSeatType());
+            ticketOrderDetailVO.setCarriageNumber(ticketPurchaseDTO.getCarriageNumber());
+            ticketOrderDetailVO.setSeatNumber(ticketPurchaseDTO.getSeatNumber());
+            ticketOrderDetailVO.setRealName(ticketPurchaseDTO.getRealName());
+            ticketOrderDetailVO.setIdType(ticketPurchaseDTO.getIdType());
+            ticketOrderDetailVO.setIdCard(ticketPurchaseDTO.getIdCard());
+            // TODO 成人票/学生票 涉及算费
+            // ticketOrderDetailVO.setTicketType();
+            // ticketOrderDetailVO.setAmount();
+            ticketOrderDetailVOList.add(ticketOrderDetailVO);
         }
 
-        // TODO 一个订单代表多个乘车人的订单？
         TicketPurchaseVO ticketPurchaseVO = new TicketPurchaseVO();
-        ticketPurchaseVO.setOrderSn(null);
         ticketPurchaseVO.setTicketOrderDetails(ticketOrderDetailVOList);
-
-        return null;
+        return ticketPurchaseVO;
     }
 
     @Transactional(rollbackFor = Throwable.class)

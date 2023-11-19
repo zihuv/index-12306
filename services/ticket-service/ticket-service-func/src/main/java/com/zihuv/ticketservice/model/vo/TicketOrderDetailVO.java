@@ -6,6 +6,11 @@ import lombok.Data;
 public class TicketOrderDetailVO {
 
     /**
+     * 订单号
+     */
+    private String orderNo;
+
+    /**
      * 席别类型
      */
     private Integer seatType;

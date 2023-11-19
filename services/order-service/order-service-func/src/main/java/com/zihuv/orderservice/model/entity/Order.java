@@ -18,7 +18,7 @@ public class Order extends BaseDO {
     /**
      * 订单号
      */
-    private String orderSn;
+    private String orderNo;
 
     /**
      * 用户id
@@ -26,9 +26,9 @@ public class Order extends BaseDO {
     private String userId;
 
     /**
-     * 用户名
+     * 真实名称
      */
-    private String username;
+    private String realName;
 
     /**
      * 列车id
@@ -74,11 +74,6 @@ public class Order extends BaseDO {
      * 支付时间
      */
     private LocalDateTime payTime;
-
-    /**
-     * 乘车日期
-     */
-    private LocalDateTime ridingDate;
 
     /**
      * 出发时间

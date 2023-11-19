@@ -8,6 +8,12 @@ public interface OrderService extends IService<Order> {
 
     /**
      * 车票订单创建
+     *
+     * @return 订单号
      */
-    void createTicketOrder(TicketOrderCreateParam requestParam);
+    String createOrder(TicketOrderCreateParam requestParam);
+
+    void cancelOrder(TicketOrderCreateParam requestParam);
+
+    void queryOrder(TicketOrderCreateParam requestParam);
 }

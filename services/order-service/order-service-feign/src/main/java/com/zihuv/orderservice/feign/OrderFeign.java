@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 @FeignClient(value = "index12306-order-service")
 public interface OrderFeign {
 
+    /**
+     * 车票订单创建，返回订单号
+     */
     @PostMapping("/api/order-service/order/create")
-    Result<?> createOrder(@RequestBody TicketOrderCreateParam requestParam);
+    Result<String> createOrder(@RequestBody TicketOrderCreateParam requestParam);
 }
