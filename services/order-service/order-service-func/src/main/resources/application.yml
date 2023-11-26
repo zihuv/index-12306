@@ -28,7 +28,7 @@ spring:
     # nacos
     nacos:
       discovery:
-        server-addr: 192.168.88.130:8848
+        server-addr: 47.120.9.134:8848
         cluster-name: GD
 
     # loadbalancer
@@ -59,4 +59,7 @@ feign:
 sa-token:
   token-style: simple-uuid
 
-
+rocketmq:
+  name-server: 192.168.88.130:9876 # NameServer 地址
+  producer:
+    group: rocketmq-service_common-message-execute # 全局发送者组定义

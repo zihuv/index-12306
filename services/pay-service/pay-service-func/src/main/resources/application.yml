@@ -28,7 +28,7 @@ spring:
     # nacos
     nacos:
       discovery:
-        server-addr: 192.168.88.130:8848
+        server-addr: 47.120.9.134:8848
         cluster-name: GD
 
     # loadbalancer
