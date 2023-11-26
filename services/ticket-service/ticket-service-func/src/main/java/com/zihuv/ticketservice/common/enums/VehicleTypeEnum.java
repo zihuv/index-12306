@@ -8,8 +8,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import static com.zihuv.ticketservice.common.enums.VehicleSeatTypeEnum.*;
-
 /**
  * 交通工具类型
  */
@@ -20,17 +18,17 @@ public enum VehicleTypeEnum {
     /**
      * 高铁
      */
-    HIGH_SPEED_RAIN(0, "HIGH_SPEED_RAIN", "高铁", ListUtil.of(BUSINESS_CLASS.getCode(), FIRST_CLASS.getCode(), SECOND_CLASS.getCode())),
+    HIGH_SPEED_RAIN(0, "HIGH_SPEED_RAIN", "高铁", ListUtil.of(VehicleSeatTypeEnum.BUSINESS_CLASS.getCode(), VehicleSeatTypeEnum.FIRST_CLASS.getCode(), VehicleSeatTypeEnum.SECOND_CLASS.getCode())),
 
     /**
      * 动车
      */
-    BULLET(1, "BULLET", "动车", ListUtil.of(SECOND_CLASS_CABIN_SEAT.getCode(), FIRST_SLEEPER.getCode(), SECOND_SLEEPER.getCode(), NO_SEAT_SLEEPER.getCode())),
+    BULLET(1, "BULLET", "动车", ListUtil.of(VehicleSeatTypeEnum.SECOND_CLASS_CABIN_SEAT.getCode(), VehicleSeatTypeEnum.FIRST_SLEEPER.getCode(), VehicleSeatTypeEnum.SECOND_SLEEPER.getCode(), VehicleSeatTypeEnum.NO_SEAT_SLEEPER.getCode())),
 
     /**
      * 普通车
      */
-    REGULAR_TRAIN(2, "REGULAR_TRAIN", "普通车", ListUtil.of(SOFT_SLEEPER.getCode(), HARD_SLEEPER.getCode(), HARD_SEAT.getCode(), NO_SEAT_SLEEPER.getCode())),
+    REGULAR_TRAIN(2, "REGULAR_TRAIN", "普通车", ListUtil.of(VehicleSeatTypeEnum.SOFT_SLEEPER.getCode(), VehicleSeatTypeEnum.HARD_SLEEPER.getCode(), VehicleSeatTypeEnum.HARD_SEAT.getCode(), VehicleSeatTypeEnum.NO_SEAT_SLEEPER.getCode())),
 
     /**
      * 汽车

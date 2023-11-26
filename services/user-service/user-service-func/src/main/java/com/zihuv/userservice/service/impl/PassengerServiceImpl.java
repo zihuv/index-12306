@@ -3,18 +3,19 @@ package com.zihuv.userservice.service.impl;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zihuv.DistributedCache;
 import com.zihuv.base.util.JSON;
+import com.zihuv.cache.DistributedCache;
 import com.zihuv.convention.exception.ServiceException;
 import com.zihuv.index12306.frameworks.starter.user.core.UserContext;
+import com.zihuv.userservice.common.constant.RedisKeyConstant;
 import com.zihuv.userservice.common.enums.VerifyStatusEnum;
 import com.zihuv.userservice.mapper.PassengerMapper;
 import com.zihuv.userservice.model.entity.Passenger;
 import com.zihuv.userservice.model.entity.UserPassenger;
 import com.zihuv.userservice.model.param.PassengerParam;
-import com.zihuv.userservice.model.vo.PassengerVO;
 import com.zihuv.userservice.service.PassengerService;
 import com.zihuv.userservice.service.UserPassengerService;
+import com.zihuv.userservice.model.vo.PassengerVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -25,9 +26,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static com.zihuv.userservice.common.constant.RedisKeyConstant.PASSENGER_SAVE_LOCK;
-import static com.zihuv.userservice.common.constant.RedisKeyConstant.USER_PASSENGER_LIST;
 
 @Slf4j
 @Service
@@ -90,7 +88,7 @@ public class PassengerServiceImpl extends ServiceImpl<PassengerMapper, Passenger
         Passenger passenger1 = this.getOne(lqw);
         if (passenger1 == null) {
             // 加分布式锁，保证原子性
-            RLock lock = redissonClient.getLock(PASSENGER_SAVE_LOCK + passenger.getIdCard());
+            RLock lock = redissonClient.getLock(RedisKeyConstant.PASSENGER_SAVE_LOCK + passenger.getIdCard());
             lock.lock();
             try {
                 Passenger passenger2 = this.getOne(lqw);
@@ -114,7 +112,7 @@ public class PassengerServiceImpl extends ServiceImpl<PassengerMapper, Passenger
         userPassenger.setPassengerId(passengerId);
         userPassengerService.save(userPassenger);
         // 删除该用户的乘车人缓存
-        distributedCache.delete(USER_PASSENGER_LIST + userId);
+        distributedCache.delete(RedisKeyConstant.USER_PASSENGER_LIST + userId);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -142,7 +140,7 @@ public class PassengerServiceImpl extends ServiceImpl<PassengerMapper, Passenger
         LambdaQueryWrapper<Passenger> lqw = new LambdaQueryWrapper<>();
         lqw.eq(Passenger::getId, passengerParamId);
         this.update(passenger, lqw);
-        distributedCache.delete(USER_PASSENGER_LIST + UserContext.getUserId());
+        distributedCache.delete(RedisKeyConstant.USER_PASSENGER_LIST + UserContext.getUserId());
     }
 
     @Override
@@ -152,12 +150,12 @@ public class PassengerServiceImpl extends ServiceImpl<PassengerMapper, Passenger
         lqw.eq(UserPassenger::getUserId, UserContext.getUserId());
         lqw.eq(UserPassenger::getPassengerId, passengerId);
         userPassengerService.remove(lqw);
-        distributedCache.delete(USER_PASSENGER_LIST + UserContext.getUserId());
+        distributedCache.delete(RedisKeyConstant.USER_PASSENGER_LIST + UserContext.getUserId());
     }
 
     private List<Passenger> getPassengerList(Long userId) {
         // 查询 passenger json 集合字符串
-        String passengerListJson = distributedCache.safeGet(USER_PASSENGER_LIST + userId, String.class, () -> {
+        String passengerListJson = distributedCache.safeGet(RedisKeyConstant.USER_PASSENGER_LIST + userId, String.class, () -> {
             LambdaQueryWrapper<UserPassenger> lqw = new LambdaQueryWrapper<>();
             lqw.eq(UserPassenger::getUserId, userId);
             List<UserPassenger> userPassengerList = userPassengerService.list(lqw);

@@ -3,14 +3,14 @@ package com.zihuv.ticketservice.service.filter.query;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.LocalDateTimeUtil;
-import com.zihuv.DistributedCache;
-import com.zihuv.convention.exception.ClientException;
+import com.zihuv.cache.DistributedCache;
+import com.zihuv.ticketservice.common.constant.RedisKeyConstant;
 import com.zihuv.ticketservice.model.entity.Region;
 import com.zihuv.ticketservice.model.entity.Station;
 import com.zihuv.ticketservice.model.param.TicketPageQueryParam;
 import com.zihuv.ticketservice.service.RegionService;
-import com.zihuv.ticketservice.service.SeatService;
 import com.zihuv.ticketservice.service.StationService;
+import com.zihuv.convention.exception.ClientException;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
@@ -18,13 +18,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-
-import static com.zihuv.ticketservice.common.constant.RedisKeyConstant.LOCK_QUERY_ALL_REGION_LIST;
-import static com.zihuv.ticketservice.common.constant.RedisKeyConstant.QUERY_ALL_REGION_LIST;
 
 /**
  * 验证参数是否有效
@@ -60,11 +56,11 @@ public class TicketQueryCheckParamVerifyHandler implements TicketQueryChainFilte
         }
 
         // 加阻塞式锁，查找数据库重新加载缓存
-        RLock lock = redissonClient.getLock(LOCK_QUERY_ALL_REGION_LIST);
+        RLock lock = redissonClient.getLock(RedisKeyConstant.LOCK_QUERY_ALL_REGION_LIST);
         lock.lock();
         try {
             // 复查缓存，查看缓存中是否存在出发地和目的地
-            if (distributedCache.hasKey(QUERY_ALL_REGION_LIST)) {
+            if (distributedCache.hasKey(RedisKeyConstant.QUERY_ALL_REGION_LIST)) {
                 emptyCacheCount = this.getEmptyCacheCount(requestParam);
                 if (emptyCacheCount != 2L) {
                     throw new ClientException("出发地或目的地不存在");
@@ -84,7 +80,7 @@ public class TicketQueryCheckParamVerifyHandler implements TicketQueryChainFilte
                 regionValueMap.put(each.getCode(), each.getName());
             }
 
-            redisTemplate.opsForHash().putAll(QUERY_ALL_REGION_LIST, regionValueMap);
+            redisTemplate.opsForHash().putAll(RedisKeyConstant.QUERY_ALL_REGION_LIST, regionValueMap);
             // 复查缓存，查看缓存中是否存在出发地和目的地
             emptyCacheCount = this.getEmptyCacheCount(requestParam);
             if (emptyCacheCount != 2L) {
@@ -97,7 +93,7 @@ public class TicketQueryCheckParamVerifyHandler implements TicketQueryChainFilte
 
     private long getEmptyCacheCount(TicketPageQueryParam requestParam) {
         List<Object> existList = redisTemplate.opsForHash().multiGet(
-                QUERY_ALL_REGION_LIST,
+                RedisKeyConstant.QUERY_ALL_REGION_LIST,
                 ListUtil.toList(requestParam.getDeparture(), requestParam.getArrival()));
         return existList.stream().filter(Objects::isNull).count();
     }

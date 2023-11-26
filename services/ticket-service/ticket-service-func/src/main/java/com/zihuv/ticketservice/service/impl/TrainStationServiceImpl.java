@@ -2,20 +2,19 @@ package com.zihuv.ticketservice.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zihuv.DistributedCache;
 import com.zihuv.base.util.JSON;
+import com.zihuv.cache.DistributedCache;
+import com.zihuv.ticketservice.common.constant.RedisKeyConstant;
+import com.zihuv.ticketservice.mapper.TrainStationMapper;
 import com.zihuv.ticketservice.model.dto.RouteDTO;
 import com.zihuv.ticketservice.model.entity.TrainStation;
 import com.zihuv.ticketservice.model.vo.TrainStationVO;
 import com.zihuv.ticketservice.service.TrainStationService;
-import com.zihuv.ticketservice.mapper.TrainStationMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static com.zihuv.ticketservice.common.constant.RedisKeyConstant.TRAIN_PASS_STATION_INFO;
 
 @Service
 @RequiredArgsConstructor
@@ -65,7 +64,7 @@ public class TrainStationServiceImpl extends ServiceImpl<TrainStationMapper, Tra
      * @return java.lang.String 列车经过站点 json
      */
     private String getTrainStationJsonByTrainId(String trainId) {
-        return distributedCache.safeGet(TRAIN_PASS_STATION_INFO + trainId, String.class, () -> {
+        return distributedCache.safeGet(RedisKeyConstant.TRAIN_PASS_STATION_INFO + trainId, String.class, () -> {
             LambdaQueryWrapper<TrainStation> lqw = new LambdaQueryWrapper<>();
             lqw.eq(TrainStation::getTrainId, trainId);
             List<TrainStation> trainStationList = this.list(lqw);

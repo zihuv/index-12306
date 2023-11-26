@@ -3,16 +3,17 @@ package com.zihuv.ticketservice.service.select;
 import cn.hutool.core.util.StrUtil;
 import com.zihuv.convention.exception.ServiceException;
 import com.zihuv.index12306.frameworks.starter.user.core.UserContext;
+import com.zihuv.ticketservice.common.constant.RedisKeyConstant;
 import com.zihuv.ticketservice.model.dto.RouteDTO;
 import com.zihuv.ticketservice.model.dto.SeatChooseDTO;
+import com.zihuv.ticketservice.model.param.TicketPurchaseDetailParam;
+import com.zihuv.ticketservice.service.TrainStationService;
+import com.zihuv.userservice.feign.UserPassengerFeign;
 import com.zihuv.ticketservice.model.dto.TicketPurchaseDTO;
 import com.zihuv.ticketservice.model.dto.TicketPurchasePassengerDTO;
 import com.zihuv.ticketservice.model.entity.Seat;
-import com.zihuv.ticketservice.model.param.TicketPurchaseDetailParam;
 import com.zihuv.ticketservice.service.SeatService;
 import com.zihuv.ticketservice.service.TrainService;
-import com.zihuv.ticketservice.service.TrainStationService;
-import com.zihuv.userservice.feign.UserPassengerFeign;
 import com.zihuv.userservice.pojo.PassengerVO;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +22,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
-
-import static com.zihuv.ticketservice.common.constant.RedisKeyConstant.SEAT_BUCKET;
 
 /**
  * 购票时列车座位选择器
@@ -59,7 +58,7 @@ public final class TrainSeatTypeSelector {
                 for (RouteDTO routeDTO : routeDTOList) {
                     String route = routeDTO.getStartStation() + "_" + routeDTO.getEndStation();
                     // 列车id:{}:路线:{}:车厢:{}:座位字母:{}-座位
-                    String seatKey = StrUtil.format(SEAT_BUCKET, requestParam.getTrainId(), route, seatCarriage, passenger.getChooseSeat());
+                    String seatKey = StrUtil.format(RedisKeyConstant.SEAT_BUCKET, requestParam.getTrainId(), route, seatCarriage, passenger.getChooseSeat());
                     // 校验这个作为是否存在
                     boolean seatIsExist = !Objects.equals(redisTemplate.opsForSet().isMember(seatKey, passenger.getChooseSeat()), Boolean.TRUE);
                     if (seatIsExist) {
@@ -141,7 +140,7 @@ public final class TrainSeatTypeSelector {
             for (Seat seat : seatList) {
                 // 列车id:{}:路线:{}:车厢:{}:座位字母:{}-座位
                 String route = seat.getStartStation() + "_" + seat.getEndStation();
-                String seatKey = StrUtil.format(SEAT_BUCKET, trainId, route, seat.getCarriageNumber(), seat.getSeatLetter());
+                String seatKey = StrUtil.format(RedisKeyConstant.SEAT_BUCKET, trainId, route, seat.getCarriageNumber(), seat.getSeatLetter());
                 redisTemplate.opsForSet().add(seatKey, seat.getSeatNumber());
 
             }

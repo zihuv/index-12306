@@ -1,10 +1,7 @@
 package com.zihuv.userservice.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.zihuv.userservice.model.param.UserDeletionParam;
 import com.zihuv.userservice.model.param.UserLoginParam;
-import com.zihuv.userservice.model.param.UserRegisterParam;
-import com.zihuv.userservice.model.param.UserUpdateParam;
 import com.zihuv.userservice.model.vo.UserLoginVO;
 
 public interface UserLoginService extends IService<UserLoginParam> {

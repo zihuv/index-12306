@@ -2,12 +2,13 @@ package com.zihuv.ticketservice.service.tokenbucket;
 
 import cn.hutool.core.lang.Singleton;
 import cn.hutool.core.util.StrUtil;
-import com.zihuv.DistributedCache;
 import com.zihuv.base.util.JSON;
+import com.zihuv.cache.DistributedCache;
 import com.zihuv.ticketservice.common.constant.Index12306Constant;
-import com.zihuv.ticketservice.model.dto.TicketPurchasePassengerDTO;
+import com.zihuv.ticketservice.common.constant.RedisKeyConstant;
 import com.zihuv.ticketservice.model.dto.RouteDTO;
 import com.zihuv.ticketservice.model.dto.SeatTypeCountDTO;
+import com.zihuv.ticketservice.model.dto.TicketPurchasePassengerDTO;
 import com.zihuv.ticketservice.model.entity.Train;
 import com.zihuv.ticketservice.model.param.TicketPurchaseDetailParam;
 import com.zihuv.ticketservice.service.SeatService;
@@ -26,8 +27,6 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
-import static com.zihuv.ticketservice.common.constant.RedisKeyConstant.*;
 
 /**
  * 列车车票余量令牌桶，应对海量并发场景下满足并行、限流以及防超卖等场景
@@ -49,7 +48,7 @@ public class TicketAvailabilityTokenBucket {
     public boolean takeTokenFromBucket(TicketPurchaseDetailParam purchaseTicketDetail) {
         // 查询列车
         Train train = distributedCache.safeGet(
-                TRAIN_INFO + purchaseTicketDetail.getTrainId(),
+                RedisKeyConstant.TRAIN_INFO + purchaseTicketDetail.getTrainId(),
                 Train.class,
                 () -> trainService.getById(purchaseTicketDetail.getTrainId()),
                 Index12306Constant.ADVANCE_TICKET_DAY,
@@ -57,11 +56,11 @@ public class TicketAvailabilityTokenBucket {
         // 获取该列车所有经过的路线
         List<RouteDTO> allRouteList = trainStationService.listTrainStationRoute(String.valueOf(train.getId()));
         // 查询是否存在令牌桶（用于存储该列车各座位类型的票数）
-        String tokenBucketHashKey = TICKET_AVAILABILITY_TOKEN_BUCKET + train.getId();
+        String tokenBucketHashKey = RedisKeyConstant.TICKET_AVAILABILITY_TOKEN_BUCKET + train.getId();
         Boolean hasKey1 = distributedCache.hasKey(tokenBucketHashKey);
         // 不存在令牌桶，加阻塞式分布式锁创建
         if (!hasKey1) {
-            RLock lock = redissonClient.getLock(String.format(LOCK_TICKET_AVAILABILITY_TOKEN_BUCKET, train.getId()));
+            RLock lock = redissonClient.getLock(String.format(RedisKeyConstant.LOCK_TICKET_AVAILABILITY_TOKEN_BUCKET, train.getId()));
             lock.lock();
             try {
                 // 再次查看是否存在令牌桶
@@ -78,7 +77,7 @@ public class TicketAvailabilityTokenBucket {
                             ticketAvailabilityTokenMap.put(buildCacheKey, seatTypeCountDTO.getSeatCount());
                         }
                     }
-                    redisTemplate.opsForHash().putAll(TICKET_AVAILABILITY_TOKEN_BUCKET + train.getId(), ticketAvailabilityTokenMap);
+                    redisTemplate.opsForHash().putAll(RedisKeyConstant.TICKET_AVAILABILITY_TOKEN_BUCKET + train.getId(), ticketAvailabilityTokenMap);
                 }
             } finally {
                 lock.unlock();

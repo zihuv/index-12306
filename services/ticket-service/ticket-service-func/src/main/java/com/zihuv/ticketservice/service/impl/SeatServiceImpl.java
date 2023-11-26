@@ -3,10 +3,10 @@ package com.zihuv.ticketservice.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zihuv.ticketservice.common.enums.VehicleTypeEnum;
+import com.zihuv.ticketservice.mapper.SeatMapper;
 import com.zihuv.ticketservice.model.dto.SeatTypeCountDTO;
 import com.zihuv.ticketservice.model.entity.Seat;
 import com.zihuv.ticketservice.service.SeatService;
-import com.zihuv.ticketservice.mapper.SeatMapper;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

@@ -2,9 +2,9 @@ package com.zihuv.userservice.model.vo;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import lombok.Data;
 import com.zihuv.userservice.serialize.IdCardDesensitizationSerializer;
 import com.zihuv.userservice.serialize.PhoneDesensitizationSerializer;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 

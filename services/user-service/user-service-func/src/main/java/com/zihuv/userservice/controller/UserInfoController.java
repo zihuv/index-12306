@@ -1,14 +1,14 @@
 package com.zihuv.userservice.controller;
 
+import com.zihuv.log.annotation.ILog;
+import com.zihuv.userservice.service.UserInfoService;
+import com.zihuv.userservice.service.UserLoginService;
 import com.zihuv.convention.result.Result;
 import com.zihuv.idempotent.annotation.Idempotent;
-import com.zihuv.log.annotation.ILog;
 import com.zihuv.userservice.model.entity.UserInfo;
 import com.zihuv.userservice.model.param.UserDeletionParam;
 import com.zihuv.userservice.model.param.UserRegisterParam;
 import com.zihuv.userservice.model.param.UserUpdateParam;
-import com.zihuv.userservice.service.UserInfoService;
-import com.zihuv.userservice.service.UserLoginService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -64,6 +64,7 @@ public class UserInfoController {
     @Operation(summary = "修改用户")
     @PostMapping("/api/user-service/update")
     public Result<?> update(@RequestBody UserUpdateParam userUpdateParam) {
+        // TODO 修改用户
         userInfoService.updateUser(userUpdateParam);
         return Result.success();
     }

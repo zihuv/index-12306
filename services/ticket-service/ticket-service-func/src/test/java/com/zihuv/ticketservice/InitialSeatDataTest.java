@@ -2,9 +2,9 @@ package com.zihuv.ticketservice;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.zihuv.ticketservice.model.dto.RouteDTO;
+import com.zihuv.ticketservice.service.TrainStationService;
 import com.zihuv.ticketservice.model.entity.Seat;
 import com.zihuv.ticketservice.service.SeatService;
-import com.zihuv.ticketservice.service.TrainStationService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

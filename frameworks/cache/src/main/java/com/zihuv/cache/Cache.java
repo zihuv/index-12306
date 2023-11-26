@@ -1,5 +1,5 @@
 
-package com.zihuv;
+package com.zihuv.cache;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

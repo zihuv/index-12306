@@ -1,12 +1,10 @@
 package com.zihuv.convention.exception;
 
-import com.zihuv.convention.errcode.BaseErrorCode;
 import com.zihuv.convention.errcode.IErrorCode;
 import lombok.Getter;
 import org.springframework.util.StringUtils;
 
 import java.rmi.RemoteException;
-import java.util.Optional;
 
 /**
  * 抽象项目中三类异常体系，客户端异常、服务端异常以及远程服务调用异常

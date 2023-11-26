@@ -3,7 +3,6 @@ package com.zihuv.ticketservice.model.vo;
 import com.zihuv.ticketservice.model.dto.SeatTypeCountDTO;
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data

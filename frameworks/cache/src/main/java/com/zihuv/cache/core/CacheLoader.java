@@ -1,4 +1,4 @@
-package com.zihuv.core;
+package com.zihuv.cache.core;
 
 /**
  * 缓存加载器

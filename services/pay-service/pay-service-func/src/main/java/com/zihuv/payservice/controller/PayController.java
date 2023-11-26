@@ -1,6 +1,10 @@
 package com.zihuv.payservice.controller;
 
 import com.zihuv.convention.result.Result;
+import com.zihuv.idempotent.annotation.Idempotent;
+import com.zihuv.idempotent.enums.IdempotentSceneEnum;
+import com.zihuv.idempotent.enums.IdempotentTypeEnum;
+import com.zihuv.payservice.common.constant.IdempotentConstant;
 import com.zihuv.payservice.common.enums.PayStrategyEnum;
 import com.zihuv.payservice.model.param.PayParam;
 import com.zihuv.payservice.model.param.RefundParam;
@@ -119,10 +123,16 @@ public class PayController {
      * @param params 支付宝所通知参数
      * @return 响应字符串 success 或 false
      */
+    @Idempotent(
+            uniqueKeyPrefix = IdempotentConstant.ASYNC_PAY_NOTIFY,
+            type = IdempotentTypeEnum.PARAM,
+            scene = IdempotentSceneEnum.RESTAPI,
+            keyTimeout = 900
+    )
     @Hidden
     @PostMapping("/api/pay-service/notify")
-    public String notifyFromAlipay(@RequestParam Map<String, String> params) {
+    public String asyncPayNotifyFromAlipay(@RequestParam Map<String, String> params) {
         PayService payService = payStrategyContext.getPayService(PayStrategyEnum.ALIPAY.getPayCode());
-        return payService.notifyOrderResult(params);
+        return payService.asyncPayNotifyPayOrder(params);
     }
 }

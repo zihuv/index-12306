@@ -2,9 +2,7 @@ package com.zihuv.ticketservice.model.entity;
 
 import java.io.Serializable;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.zihuv.database.base.BaseDO;

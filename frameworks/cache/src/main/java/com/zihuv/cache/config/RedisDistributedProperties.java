@@ -1,4 +1,4 @@
-package com.zihuv.config;
+package com.zihuv.cache.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;

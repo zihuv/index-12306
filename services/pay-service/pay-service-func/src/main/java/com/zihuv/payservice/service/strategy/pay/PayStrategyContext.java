@@ -1,12 +1,9 @@
 package com.zihuv.payservice.service.strategy.pay;
 
 import com.zihuv.base.context.ApplicationContextHolder;
-import com.zihuv.convention.exception.ServiceException;
 import com.zihuv.payservice.common.enums.PayStrategyEnum;
 import com.zihuv.payservice.service.PayService;
-import jakarta.annotation.PostConstruct;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;

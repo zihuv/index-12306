@@ -1,11 +1,11 @@
-package com.zihuv;
+package com.zihuv.cache;
 
+import com.zihuv.cache.core.CacheLoader;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 
 import java.util.concurrent.TimeUnit;
 
-import com.zihuv.core.CacheLoader;
 import jakarta.validation.constraints.NotNull;
 
 /**

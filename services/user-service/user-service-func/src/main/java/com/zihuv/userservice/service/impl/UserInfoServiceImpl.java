@@ -2,7 +2,7 @@ package com.zihuv.userservice.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zihuv.DistributedCache;
+import com.zihuv.cache.DistributedCache;
 import com.zihuv.convention.exception.ClientException;
 import com.zihuv.designpattern.chain.AbstractChainContext;
 import com.zihuv.index12306.frameworks.starter.user.core.UserContext;

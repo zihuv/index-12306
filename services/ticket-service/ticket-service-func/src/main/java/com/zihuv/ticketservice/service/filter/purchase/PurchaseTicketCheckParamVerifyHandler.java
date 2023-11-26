@@ -3,11 +3,11 @@ package com.zihuv.ticketservice.service.filter.purchase;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.zihuv.DistributedCache;
 import com.zihuv.base.util.JSON;
+import com.zihuv.cache.DistributedCache;
 import com.zihuv.convention.exception.ClientException;
 import com.zihuv.index12306.frameworks.starter.user.core.UserContext;
-import com.zihuv.ticketservice.common.constant.Index12306Constant;
+import com.zihuv.ticketservice.common.constant.RedisKeyConstant;
 import com.zihuv.ticketservice.common.enums.VehicleTypeEnum;
 import com.zihuv.ticketservice.model.dto.TicketPurchasePassengerDTO;
 import com.zihuv.ticketservice.model.entity.Train;
@@ -16,6 +16,7 @@ import com.zihuv.ticketservice.model.param.TicketPurchaseDetailParam;
 import com.zihuv.ticketservice.service.TrainService;
 import com.zihuv.ticketservice.service.TrainStationService;
 import com.zihuv.userservice.feign.UserPassengerFeign;
+import com.zihuv.ticketservice.common.constant.Index12306Constant;
 import com.zihuv.userservice.pojo.PassengerVO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,9 +27,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
-
-import static com.zihuv.ticketservice.common.constant.RedisKeyConstant.TRAIN_INFO;
-import static com.zihuv.ticketservice.common.constant.RedisKeyConstant.TRAIN_STATION_STOPOVER_DETAIL;
 
 @Slf4j
 @Component
@@ -47,7 +45,7 @@ public class PurchaseTicketCheckParamVerifyHandler implements PurchaseTicketChai
     public void handler(TicketPurchaseDetailParam requestParam) {
         // 查询该车次是否存在
         Train train = distributedCache.safeGet(
-                TRAIN_INFO + requestParam.getTrainId(),
+                RedisKeyConstant.TRAIN_INFO + requestParam.getTrainId(),
                 Train.class,
                 () -> trainService.getById(requestParam.getTrainId()),
                 Index12306Constant.ADVANCE_TICKET_DAY,
@@ -68,7 +66,7 @@ public class PurchaseTicketCheckParamVerifyHandler implements PurchaseTicketChai
 
         // 车站是否存在车次中，车站的顺序是否正确
         String trainStationStopoverDetailJson = distributedCache.safeGet(
-                TRAIN_STATION_STOPOVER_DETAIL + requestParam.getTrainId(),
+                RedisKeyConstant.TRAIN_STATION_STOPOVER_DETAIL + requestParam.getTrainId(),
                 String.class,
                 () -> {
                     LambdaQueryWrapper<TrainStation> lqw = new LambdaQueryWrapper<>();

@@ -1,7 +1,7 @@
-package com.zihuv;
+package com.zihuv.cache;
 
-import com.zihuv.config.RedisDistributedProperties;
-import com.zihuv.core.CacheLoader;
+import com.zihuv.cache.config.RedisDistributedProperties;
+import com.zihuv.cache.core.CacheLoader;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;

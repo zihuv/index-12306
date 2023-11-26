@@ -5,28 +5,29 @@ import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.zihuv.DistributedCache;
+import com.zihuv.cache.DistributedCache;
+import com.zihuv.ticketservice.common.constant.RedisKeyConstant;
+import com.zihuv.ticketservice.common.enums.TicketChainMarkEnum;
+import com.zihuv.ticketservice.mapper.TicketMapper;
+import com.zihuv.ticketservice.model.dto.RouteDTO;
+import com.zihuv.ticketservice.model.dto.SeatTypeCountDTO;
+import com.zihuv.ticketservice.model.entity.Station;
+import com.zihuv.ticketservice.model.entity.Ticket;
+import com.zihuv.ticketservice.model.entity.TrainStation;
+import com.zihuv.ticketservice.model.param.TicketPageQueryParam;
+import com.zihuv.ticketservice.model.param.TicketPurchaseDetailParam;
+import com.zihuv.ticketservice.model.vo.TicketPageQueryVO;
 import com.zihuv.convention.exception.ServiceException;
 import com.zihuv.convention.result.Result;
 import com.zihuv.designpattern.chain.AbstractChainContext;
 import com.zihuv.orderservice.feign.OrderFeign;
 import com.zihuv.orderservice.model.param.TicketOrderCreateParam;
 import com.zihuv.ticketservice.common.constant.Index12306Constant;
-import com.zihuv.ticketservice.common.enums.TicketChainMarkEnum;
-import com.zihuv.ticketservice.model.dto.RouteDTO;
-import com.zihuv.ticketservice.model.dto.SeatTypeCountDTO;
 import com.zihuv.ticketservice.model.dto.TicketPurchaseDTO;
 import com.zihuv.ticketservice.model.vo.TicketOrderDetailVO;
-import com.zihuv.ticketservice.model.entity.Station;
-import com.zihuv.ticketservice.model.entity.Ticket;
 import com.zihuv.ticketservice.model.entity.Train;
-import com.zihuv.ticketservice.model.entity.TrainStation;
-import com.zihuv.ticketservice.model.param.TicketPurchaseDetailParam;
-import com.zihuv.ticketservice.model.param.TicketPageQueryParam;
 import com.zihuv.ticketservice.model.vo.TicketPurchaseVO;
-import com.zihuv.ticketservice.model.vo.TicketPageQueryVO;
 import com.zihuv.ticketservice.service.*;
-import com.zihuv.ticketservice.mapper.TicketMapper;
 import com.zihuv.ticketservice.service.select.TrainSeatTypeSelector;
 import com.zihuv.ticketservice.service.tokenbucket.TicketAvailabilityTokenBucket;
 import jakarta.annotation.PostConstruct;
@@ -38,8 +39,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-
-import static com.zihuv.ticketservice.common.constant.RedisKeyConstant.*;
 
 @Service
 @RequiredArgsConstructor
@@ -67,7 +66,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
         long stationToId = Long.parseLong(String.valueOf(this.getStationByStationName(ticketPageQueryParam.getArrival()).getId()));
 
         // 使用 redis 对出发站和目标站的列车 id 取交集，获取可以直达的列车 id
-        Set<Object> stationIdSet = redisTemplate.opsForSet().intersect(STATION_TRAIN_PASS_SET + stationFromId, STATION_TRAIN_PASS_SET + stationToId);
+        Set<Object> stationIdSet = redisTemplate.opsForSet().intersect(RedisKeyConstant.STATION_TRAIN_PASS_SET + stationFromId, RedisKeyConstant.STATION_TRAIN_PASS_SET + stationToId);
         if (CollUtil.isEmpty(stationIdSet)) {
             throw new ServiceException("出发地和目的地不存在直达");
         }
@@ -135,7 +134,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
         // 发生异常，回滚令牌桶中的令牌
 
         Train train = distributedCache.safeGet(
-                TRAIN_INFO + requestParam.getTrainId(),
+                RedisKeyConstant.TRAIN_INFO + requestParam.getTrainId(),
                 Train.class,
                 () -> trainService.getById(requestParam.getTrainId()),
                 Index12306Constant.ADVANCE_TICKET_DAY,
@@ -186,7 +185,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
         // 查询列车信息
         String trainId = requestParam.getTrainId();
         Train train = distributedCache.safeGet(
-                TRAIN_INFO + trainId,
+                RedisKeyConstant.TRAIN_INFO + trainId,
                 Train.class,
                 () -> trainService.getById(trainId),
                 Index12306Constant.ADVANCE_TICKET_DAY,
@@ -226,7 +225,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
         List<TrainStation> trainStationList = trainStationService.list(lqw);
         for (TrainStation trainStation : trainStationList) {
             if (trainStation.getTrainId() != null && trainStation.getStationId() != null) {
-                redisTemplate.opsForSet().add(STATION_TRAIN_PASS_SET + trainStation.getStationId(), trainStation.getTrainId());
+                redisTemplate.opsForSet().add(RedisKeyConstant.STATION_TRAIN_PASS_SET + trainStation.getStationId(), trainStation.getTrainId());
             }
 
         }
@@ -240,7 +239,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
      * @return 车站
      */
     private Station getStationByStationName(String stationName) {
-        Station station = distributedCache.get(TRAIN_STATION_INFO + stationName, Station.class);
+        Station station = distributedCache.get(RedisKeyConstant.TRAIN_STATION_INFO + stationName, Station.class);
         if (station == null) {
             LambdaQueryWrapper<Station> lqw = new LambdaQueryWrapper<>();
             lqw.eq(Station::getName, stationName);
@@ -248,7 +247,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
             if (station == null) {
                 throw new ServiceException("该车站不存在");
             }
-            distributedCache.put(TRAIN_STATION_INFO + stationName, station);
+            distributedCache.put(RedisKeyConstant.TRAIN_STATION_INFO + stationName, station);
         }
         return station;
     }

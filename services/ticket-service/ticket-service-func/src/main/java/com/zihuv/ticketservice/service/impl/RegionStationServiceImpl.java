@@ -1,6 +1,6 @@
 package com.zihuv.ticketservice.service.impl;
 
-import com.zihuv.DistributedCache;
+import com.zihuv.cache.DistributedCache;
 import com.zihuv.base.util.JSON;
 import com.zihuv.ticketservice.model.entity.Station;
 import com.zihuv.ticketservice.model.vo.StationVO;
