@@ -19,7 +19,7 @@ public interface PayService {
     void closeTrade(String orderNo);
 
     /**
-     * 查询支付信息
+     * 查询支付信息（定时查询）
      *
      * @param orderNo 订单号
      * @return
@@ -46,5 +46,5 @@ public interface PayService {
 
     void billDownload();
 
-    String notifyOrderResult(Map<String, String> params);
+    String asyncPayNotifyPayOrder(Map<String, String> params);
 }

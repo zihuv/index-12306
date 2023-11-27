@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 车票订单创建请求参数
+ * 创建车票订单请求参数
  */
 @Data
 public class TicketOrderCreateParam {

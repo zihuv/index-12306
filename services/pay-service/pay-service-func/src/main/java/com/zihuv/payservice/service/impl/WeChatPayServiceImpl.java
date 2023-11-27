@@ -45,7 +45,7 @@ public class WeChatPayServiceImpl implements PayService {
     }
 
     @Override
-    public String notifyOrderResult(Map<String, String> params) {
+    public String asyncPayNotifyPayOrder(Map<String, String> params) {
         return null;
     }
 }
