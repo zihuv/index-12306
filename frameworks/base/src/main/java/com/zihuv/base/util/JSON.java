@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.zihuv.base.context.ApplicationContextHolder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.Objects;
 @Slf4j
 public class JSON {
 
+    @Lazy
     private static final ObjectMapper objectMapper = ApplicationContextHolder.getBean(ObjectMapper.class);
 
     /**
