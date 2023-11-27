@@ -4,10 +4,15 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Objects;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class Result<T> {
+
+    public static final Integer SUCCESS = 200;
+    public static final Integer FAIL = 404;
 
     /**
      * 返回码
@@ -33,7 +38,7 @@ public class Result<T> {
     }
 
     public static <T> Result<T> success(String message, T data) {
-        return Result.generate(200, message, data);
+        return Result.generate(SUCCESS, message, data);
     }
 
     public static <T> Result<T> fail(String message) {
@@ -41,7 +46,11 @@ public class Result<T> {
     }
 
     public static <T> Result<T> fail(String message, T data) {
-        return Result.generate(404, message, data);
+        return Result.generate(FAIL, message, data);
+    }
+
+    public boolean isSuccess() {
+        return Objects.equals(this.code, SUCCESS);
     }
 
     /**
