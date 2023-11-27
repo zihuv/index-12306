@@ -23,6 +23,7 @@
         <module>idempotent</module>
         <module>base</module>
         <module>bizs</module>
+        <module>mq</module>
     </modules>
 
     <dependencies>
