@@ -14,9 +14,11 @@ index-12306:
   check-same-token: false
   # 是否将日志信息添加进数据库
   insert-logs: false
+  # mq 消息延时发送时间
+  mq-delay-level: 14
 
 mybatis-plus:
   configuration:
     mapUnderscoreToCamelCase: true
     # 打印 sql 日志
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

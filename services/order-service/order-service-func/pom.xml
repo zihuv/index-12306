@@ -69,7 +69,11 @@
             <artifactId>index12306-base-spring-boot-starter</artifactId>
             <version>${revision}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.zihuv.index12306</groupId>
+            <artifactId>index12306-mq-spring-boot-starter</artifactId>
+            <version>${revision}</version>
+        </dependency>
     </dependencies>
 
 </project>

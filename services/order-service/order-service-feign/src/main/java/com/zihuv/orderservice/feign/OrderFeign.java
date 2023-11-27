@@ -10,8 +10,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 public interface OrderFeign {
 
     /**
-     * 车票订单创建，返回订单号
+     * 创建车票订单，返回订单号
      */
     @PostMapping("/api/order-service/order/create")
     Result<String> createOrder(@RequestBody TicketOrderCreateParam requestParam);
+
+    /**
+     * 关闭订单
+     */
+    @PostMapping("/api/order-service/order/close")
+    Result<?> closeOrder(@RequestBody String orderNo);
 }

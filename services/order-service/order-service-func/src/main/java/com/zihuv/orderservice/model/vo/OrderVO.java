@@ -1,31 +1,16 @@
-package com.zihuv.orderservice.model.entity;
+package com.zihuv.orderservice.model.vo;
 
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.zihuv.database.base.BaseDO;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
-@TableName("tb_order")
-public class Order extends BaseDO {
-
-    /**
-     * id
-     */
-    @TableId
-    private Long id;
+public class OrderVO {
 
     /**
      * 订单号
      */
     private String orderNo;
-
-    /**
-     * 用户id
-     */
-    private String userId;
 
     /**
      * 真实名称
