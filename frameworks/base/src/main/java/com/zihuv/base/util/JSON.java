@@ -8,6 +8,7 @@ import com.zihuv.base.context.ApplicationContextHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -55,7 +56,19 @@ public class JSON {
             return objectMapper.readValue(json, tClass);
         } catch (JsonProcessingException e) {
             log.error("json 反序列化错误：{}", json, e);
-            throw new IllegalArgumentException("JSON反序列化错误", e);
+            throw new IllegalArgumentException("json 反序列化错误", e);
+        }
+    }
+
+    public static <T> T toBean(byte[] json, Class<T> tClass) {
+        try {
+            return objectMapper.readValue(json, tClass);
+        } catch (JsonProcessingException e) {
+            log.error("json 反序列化错误：{}", json, e);
+            throw new IllegalArgumentException("json 反序列化错误", e);
+        } catch (IOException e) {
+            log.error("json 反序列化错误：{}", json, e);
+            throw new RuntimeException("json 反序列化错误", e);
         }
     }
 
