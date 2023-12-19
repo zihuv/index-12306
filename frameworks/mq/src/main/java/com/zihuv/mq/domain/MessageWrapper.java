@@ -5,23 +5,25 @@ import lombok.*;
 import java.util.UUID;
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@RequiredArgsConstructor
 public class MessageWrapper<T> {
 
     /**
      * 消息发送 Keys
      */
-    @NonNull
     private String keys;
 
     /**
      * 消息体
      */
-    @NonNull
     private T message;
+
+    public MessageWrapper() {
+    }
+
+    public MessageWrapper(String keys, T message) {
+        this.keys = keys;
+        this.message = message;
+    }
 
     /**
      * 唯一标识，用于客户端幂等验证
