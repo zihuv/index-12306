@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.zihuv.cache.DistributedCache;
 import com.zihuv.cache.RedisTemplateProxy;
 import lombok.RequiredArgsConstructor;
 import org.redisson.api.RedissonClient;
@@ -31,7 +32,7 @@ public class CacheAutoConfiguration {
     private final RedisDistributedProperties redisDistributedProperties;
 
     @Bean
-    public RedisTemplateProxy redisTemplateProxy(RedisTemplate<String, Object> redisTemplate, RedissonClient redissonClient) {
+    public DistributedCache distributedCache(RedisTemplate<String, Object> redisTemplate, RedissonClient redissonClient) {
         return new RedisTemplateProxy(redisDistributedProperties, redisTemplate, redissonClient);
     }
 
