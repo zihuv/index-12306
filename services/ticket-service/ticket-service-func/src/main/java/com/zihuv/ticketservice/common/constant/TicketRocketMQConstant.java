@@ -18,7 +18,7 @@ public final class TicketRocketMQConstant {
     /**
      * 购票服务创建订单后延时关闭业务消费者组 Key
      */
-    public static final String TICKET_DELAY_CLOSE_CG_KEY = "index12306_ticket-service_delay-close-order_cg${unique-name:}";
+    public static final String TICKET_DELAY_CLOSE_CG_KEY = "index12306_ticket-service_delay-close-order_cg";
 
     /**
      * Canal 监听数据库余票变更 Topic Key

@@ -18,7 +18,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public abstract class AbstractCommonSendProduceTemplate<T> {
 
-    private final RocketMQTemplate rocketMQTemplate;
+    public final RocketMQTemplate rocketMQTemplate;
 
     /**
      * 构建消息发送事件基础扩充属性实体
@@ -64,4 +64,6 @@ public abstract class AbstractCommonSendProduceTemplate<T> {
         }
         return sendResult;
     }
+
+    public abstract SendResult sendTransactionalMessage(T messageSendEvent);
 }

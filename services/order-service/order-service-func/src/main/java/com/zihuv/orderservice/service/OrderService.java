@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.zihuv.orderservice.model.entity.Order;
 import com.zihuv.orderservice.model.param.TicketOrderCreateParam;
 import com.zihuv.orderservice.model.vo.OrderVO;
+import com.zihuv.orderservice.mq.event.DelayCloseOrderEvent;
 
 public interface OrderService extends IService<Order> {
 
@@ -13,6 +14,13 @@ public interface OrderService extends IService<Order> {
      * @return 订单号
      */
     String createOrder(TicketOrderCreateParam requestParam);
+
+    /**
+     * 存储订单
+     *
+     * @param delayCloseOrderEvent 订单事件
+     */
+    void saveOrder(DelayCloseOrderEvent delayCloseOrderEvent);
 
     /**
      * 取消订单

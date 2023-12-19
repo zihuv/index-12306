@@ -12,4 +12,6 @@ public class OrderRocketMQConstant {
      */
     public static final String ORDER_DELAY_CLOSE_TAG_KEY = "index12306_order-service_delay-close-order_tag";
 
+
+    public static final String ORDER_PRODUCER_GROUP = "ORDER_PRODUCER_GROUP";
 }

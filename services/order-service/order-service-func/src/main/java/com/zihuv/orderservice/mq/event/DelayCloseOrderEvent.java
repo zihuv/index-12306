@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -31,6 +33,21 @@ public class DelayCloseOrderEvent {
      * 订单号
      */
     private String orderNo;
+
+    /**
+     * 列车车次
+     */
+    private String trainNumber;
+
+    /**
+     * 出发时间
+     */
+    private LocalDateTime departureTime;
+
+    /**
+     * 出发时间
+     */
+    private LocalDateTime arrivalTime;
 
     /**
      * 乘车人购票信息

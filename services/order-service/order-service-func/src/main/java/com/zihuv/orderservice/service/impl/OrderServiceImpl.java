@@ -9,11 +9,11 @@ import com.zihuv.cache.DistributedCache;
 import com.zihuv.convention.exception.ServiceException;
 import com.zihuv.orderservice.common.constant.RedisKeyConstant;
 import com.zihuv.orderservice.common.enums.OrderStatusEnum;
+import com.zihuv.orderservice.mapper.OrderMapper;
 import com.zihuv.orderservice.model.dto.PassengerInfoDTO;
 import com.zihuv.orderservice.model.entity.Order;
-import com.zihuv.orderservice.model.vo.OrderVO;
-import com.zihuv.orderservice.mapper.OrderMapper;
 import com.zihuv.orderservice.model.param.TicketOrderCreateParam;
+import com.zihuv.orderservice.model.vo.OrderVO;
 import com.zihuv.orderservice.mq.event.DelayCloseOrderEvent;
 import com.zihuv.orderservice.mq.producer.DelayCloseOrderSendProducer;
 import com.zihuv.orderservice.service.OrderService;
@@ -22,8 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.producer.SendResult;
 import org.apache.rocketmq.client.producer.SendStatus;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -35,7 +35,6 @@ import java.util.concurrent.ThreadLocalRandom;
 public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements OrderService {
 
     private final DistributedCache distributedCache;
-    private final RedisTemplate<String, Object> redisTemplate;
     private final DelayCloseOrderSendProducer delayCloseOrderSendProducer;
 
     @Value("${index-12306.tail-number-strategy:userId}")
@@ -60,30 +59,14 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         return date + timestamp + tailNumber;
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
     public String createOrder(TicketOrderCreateParam requestParam) {
         // TODO 订单创建的幂等性，考虑加锁？
-        Order order = new Order();
         String orderNo = this.getOrderNo(requestParam.getUserId());
-        order.setOrderNo(orderNo);
-        order.setUserId(String.valueOf(requestParam.getUserId()));
-        order.setRealName(requestParam.getRealName());
-        order.setTrainId(requestParam.getTrainId());
-        order.setDeparture(requestParam.getDeparture());
-        order.setSource(0);
-        order.setStatus(OrderStatusEnum.NOT_PAY.getCode());
-        order.setOrderTime(LocalDateTime.now());
-        order.setTrainNumber(requestParam.getTrainNumber());
-        order.setArrival(requestParam.getArrival());
-        order.setDepartureTime(requestParam.getDepartureTime());
-        order.setArrivalTime(requestParam.getArrivalTime());
-
-        this.save(order);
-        // 修改订单状态
-        distributedCache.put(RedisKeyConstant.ORDER_STATUS + orderNo, OrderStatusEnum.NOT_PAY.getCode());
         // 发送 RocketMQ 延时消息，指定时间后取消订单
         PassengerInfoDTO passengerInfoDTO = PassengerInfoDTO.builder()
-                .userId(Long.parseLong(order.getUserId()) )
+                .userId(Long.parseLong(String.valueOf(requestParam.getUserId())))
                 .realName(requestParam.getRealName())
                 .build();
 
@@ -91,22 +74,47 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 .trainId(String.valueOf(requestParam.getTrainId()))
                 .departure(requestParam.getDeparture())
                 .arrival(requestParam.getArrival())
-                .orderNo(order.getOrderNo())
+                .orderNo(orderNo)
                 .passengerInfoDTO(passengerInfoDTO)
+                .trainNumber(requestParam.getTrainNumber())
+                .arrivalTime(requestParam.getArrivalTime())
+                .departureTime(requestParam.getDepartureTime())
                 .build();
         // 创建订单并支付后延时关闭订单消息
         try {
-            SendResult sendResult = delayCloseOrderSendProducer.sendMessage(delayCloseOrderEvent);
+            SendResult sendResult = delayCloseOrderSendProducer.sendTransactionalMessage(delayCloseOrderEvent);
             if (!Objects.equals(sendResult.getSendStatus(), SendStatus.SEND_OK)) {
-                throw new ServiceException("投递延迟关闭订单消息队列失败");
+                throw new ServiceException("[延迟队列] 投递延迟关闭订单消息队列失败");
             }
         } catch (Throwable e) {
-            log.error("延迟关闭订单消息队列发送错误，请求参数：{}", JSON.toJsonStr(requestParam), e);
+            log.error("[延迟队列] 发送订单消息延迟队列发生错误，请求参数：{}", JSON.toJsonStr(requestParam), e);
             throw e;
         }
-
-        log.info("[创建订单] 订单信息：{}", order);
+        log.info("[创建订单] 订单创建成功，参数：" + JSON.toJsonStr(requestParam));
         return orderNo;
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void saveOrder(DelayCloseOrderEvent delayCloseOrderEvent) {
+        // 创建订单
+        Order order = new Order();
+        String orderNo = this.getOrderNo(Long.parseLong(delayCloseOrderEvent.getOrderNo()));
+        order.setOrderNo(orderNo);
+        order.setUserId(String.valueOf(delayCloseOrderEvent.getPassengerInfoDTO().getUserId()));
+        order.setRealName(delayCloseOrderEvent.getPassengerInfoDTO().getRealName());
+        order.setTrainId(Long.parseLong(delayCloseOrderEvent.getTrainId()));
+        order.setDeparture(delayCloseOrderEvent.getDeparture());
+        order.setSource(0);
+        order.setStatus(OrderStatusEnum.NOT_PAY.getCode());
+        order.setOrderTime(LocalDateTime.now());
+        order.setTrainNumber(delayCloseOrderEvent.getTrainNumber());
+        order.setArrival(delayCloseOrderEvent.getArrival());
+        order.setDepartureTime(delayCloseOrderEvent.getDepartureTime());
+        order.setArrivalTime(delayCloseOrderEvent.getArrivalTime());
+        this.save(order);
+        // TODO 插入订单事务表
+
     }
 
     @Override
