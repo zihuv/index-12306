@@ -1,7 +1,9 @@
 package com.zihuv.mq.core;
 
 import com.alibaba.fastjson.JSON;
+import com.zihuv.mq.db.MessageMapper;
 import com.zihuv.mq.domain.BaseMessage;
+import com.zihuv.mq.domain.LocalMessage;
 import com.zihuv.mq.domain.MessageWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.producer.SendResult;
@@ -19,6 +21,9 @@ public abstract class AbstractCommonSendProduceTemplate<T> {
 
     @Autowired
     private RocketMQTemplate rocketMQTemplate;
+
+    @Autowired
+    private MessageMapper messageMapper;
 
     /**
      * 构建消息基础参数（默认情况下，仅需重写该方法即可。发送消息有模板模式）
@@ -59,6 +64,16 @@ public abstract class AbstractCommonSendProduceTemplate<T> {
      */
     public SendResult sendMessage(T messageSendEvent) {
         BaseMessage<T> baseMessage = buildBaseMessage(messageSendEvent);
+        return sendMessage(baseMessage);
+    }
+
+    /**
+     * 消息事件通用发送（使用 baseMessage 来发消息）
+     *
+     * @param baseMessage 消息基础参数
+     * @return 消息发送返回结果
+     */
+    public SendResult sendMessage(BaseMessage<T> baseMessage) {
         String destination = buildDestination(baseMessage);
         Message<?> message = buildMessage(baseMessage);
 
@@ -72,10 +87,30 @@ public abstract class AbstractCommonSendProduceTemplate<T> {
             );
             log.info("[{}] 消息发送结果：{}，消息 ID：{}，消息 Keys：{}", baseMessage.getEventName(), sendResult.getSendStatus(), sendResult.getMsgId(), baseMessage.getKeys());
         } catch (Exception ex) {
-            log.error("[{}] 消息发送失败，消息体：{}", baseMessage.getEventName(), JSON.toJSONString(messageSendEvent), ex);
+            log.error("[{}] 消息发送失败，消息体：{}", baseMessage.getEventName(), JSON.toJSONString(baseMessage), ex);
             throw ex;
         }
         return sendResult;
+    }
+
+
+    /**
+     * 存储消息到本地消息表，并发送消息（需要开启事务）
+     *
+     * @param messageSendEvent 消息发送事件
+     * @return 消息发送返回结果
+     */
+    public SendResult saveAndSendMessage(T messageSendEvent) {
+        BaseMessage<T> baseMessage = buildBaseMessage(messageSendEvent);
+        String destination = buildDestination(baseMessage);
+        Message<?> message = buildMessage(baseMessage);
+        // 将消息存入本地消息表
+        LocalMessage localMessage = new LocalMessage();
+        localMessage.setDestination(destination);
+        localMessage.setMessageBody(message);
+        messageMapper.insert(localMessage);
+        // 发送消息
+        return sendMessage(baseMessage);
     }
 
     /**
@@ -98,7 +133,7 @@ public abstract class AbstractCommonSendProduceTemplate<T> {
             log.info("[事务消息: {}] half 消息发送成功", baseMessage.getEventName());
             log.info("[{}] 消息发送结果：{}，消息 ID：{}，消息 Keys：{}", baseMessage.getEventName(), sendResult.getSendStatus(), sendResult.getMsgId(), baseMessage.getKeys());
         } catch (Exception ex) {
-            log.error("[{}] 消息发送失败，消息体：{}", baseMessage.getEventName(), JSON.toJSONString(messageSendEvent), ex);
+            log.error("[{}] 消息发送失败，消息体：{}", baseMessage.getEventName(), JSON.toJSONString(baseMessage), ex);
             throw ex;
         }
         return sendResult;
