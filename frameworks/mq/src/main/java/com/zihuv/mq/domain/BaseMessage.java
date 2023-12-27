@@ -5,14 +5,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * 消息基础参数
+ */
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public final class BaseSendExtendDTO {
+public final class BaseMessage<T> {
 
     /**
-     * 事件名称
+     * 事件名称（用于打印日志）
      */
     private String eventName;
 
@@ -27,17 +30,22 @@ public final class BaseSendExtendDTO {
     private String tag;
 
     /**
-     * 业务标识
+     * 业务唯一标识符（如：订单号）
      */
     private String keys;
 
     /**
-     * 发送消息超时时间
+     * 消息内容
      */
-    private Long sentTimeout;
+    private T messageBody;
 
     /**
-     * 延迟消息
+     * 发送消息超时时间
      */
-    private Integer delayLevel;
+    private Long sentTimeout = 2000L;
+
+    /**
+     * 延迟消息（0 - 不设置为延迟消息）
+     */
+    private Integer delayLevel = 0;
 }

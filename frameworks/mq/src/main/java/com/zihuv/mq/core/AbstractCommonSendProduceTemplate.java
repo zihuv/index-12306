@@ -1,69 +1,106 @@
 package com.zihuv.mq.core;
 
-import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
-import com.zihuv.mq.domain.BaseSendExtendDTO;
-import lombok.RequiredArgsConstructor;
+import com.zihuv.mq.domain.BaseMessage;
+import com.zihuv.mq.domain.MessageWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.common.message.MessageConst;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
-
-import java.util.Optional;
+import org.springframework.messaging.support.MessageBuilder;
 
 /**
  * RocketMQ 抽象公共发送消息组件
  */
 @Slf4j
-@RequiredArgsConstructor
 public abstract class AbstractCommonSendProduceTemplate<T> {
 
-    public final RocketMQTemplate rocketMQTemplate;
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
 
     /**
-     * 构建消息发送事件基础扩充属性实体
+     * 构建消息基础参数（默认情况下，仅需重写该方法即可。发送消息有模板模式）
      *
-     * @param messageSendEvent 消息发送事件
-     * @return 扩充属性实体
+     * @param messageSendEvent 消息事件
+     * @return 消息基础参数
      */
-    public abstract BaseSendExtendDTO buildBaseSendExtendParam(T messageSendEvent);
+    public abstract BaseMessage<T> buildBaseMessage(T messageSendEvent);
 
     /**
-     * 构建消息基本参数，请求头、Keys...
+     * 构建消息发送目的地
      *
-     * @param messageSendEvent 消息发送事件
-     * @param requestParam     扩充属性实体
-     * @return 消息基本参数
+     * @param baseMessage 消息基础参数
+     * @return 消息发送目的地
      */
-    public abstract Message<?> buildMessage(T messageSendEvent, BaseSendExtendDTO requestParam);
+    public String buildDestination(BaseMessage<T> baseMessage) {
+        return baseMessage.getTopic() + ":" + baseMessage.getTag();
+    }
 
     /**
-     * 消息事件通用发送
+     * 构建消息
+     *
+     * @param baseMessage 消息基础参数
+     * @return 消息
+     */
+    public Message<?> buildMessage(BaseMessage<T> baseMessage) {
+        return MessageBuilder
+                .withPayload(new MessageWrapper<>(baseMessage.getMessageBody()))
+                .setHeader(MessageConst.PROPERTY_KEYS, baseMessage.getKeys())
+                .build();
+    }
+
+    /**
+     * 消息事件通用发送（模板模式）
      *
      * @param messageSendEvent 消息发送事件
      * @return 消息发送返回结果
      */
     public SendResult sendMessage(T messageSendEvent) {
-        BaseSendExtendDTO baseSendExtendDTO = buildBaseSendExtendParam(messageSendEvent);
+        BaseMessage<T> baseMessage = buildBaseMessage(messageSendEvent);
+        String destination = buildDestination(baseMessage);
+        Message<?> message = buildMessage(baseMessage);
+
         SendResult sendResult;
         try {
-            StringBuilder destinationBuilder = StrUtil.builder().append(baseSendExtendDTO.getTopic());
-            if (StrUtil.isNotBlank(baseSendExtendDTO.getTag())) {
-                destinationBuilder.append(":").append(baseSendExtendDTO.getTag());
-            }
             sendResult = rocketMQTemplate.syncSend(
-                    destinationBuilder.toString(),
-                    buildMessage(messageSendEvent, baseSendExtendDTO),
-                    baseSendExtendDTO.getSentTimeout(),
-                    Optional.ofNullable(baseSendExtendDTO.getDelayLevel()).orElse(0)
+                    destination,
+                    message,
+                    baseMessage.getSentTimeout(),
+                    baseMessage.getDelayLevel()
             );
-            log.info("[{}] 消息发送结果：{}，消息ID：{}，消息Keys：{}", baseSendExtendDTO.getEventName(), sendResult.getSendStatus(), sendResult.getMsgId(), baseSendExtendDTO.getKeys());
-        } catch (Throwable ex) {
-            log.error("[{}] 消息发送失败，消息体：{}", baseSendExtendDTO.getEventName(), JSON.toJSONString(messageSendEvent), ex);
+            log.info("[{}] 消息发送结果：{}，消息 ID：{}，消息 Keys：{}", baseMessage.getEventName(), sendResult.getSendStatus(), sendResult.getMsgId(), baseMessage.getKeys());
+        } catch (Exception ex) {
+            log.error("[{}] 消息发送失败，消息体：{}", baseMessage.getEventName(), JSON.toJSONString(messageSendEvent), ex);
             throw ex;
         }
         return sendResult;
     }
 
-    public abstract SendResult sendTransactionalMessage(T messageSendEvent);
+    /**
+     * 事务消息事件通用发送（模板模式）
+     *
+     * @param messageSendEvent 消息发送事件
+     * @return 消息发送返回结果
+     */
+    public SendResult sendTransactionalMessage(T messageSendEvent) {
+        BaseMessage<T> baseMessage = buildBaseMessage(messageSendEvent);
+        String destination = buildDestination(baseMessage);
+        Message<?> message = buildMessage(baseMessage);
+
+        SendResult sendResult;
+        try {
+            sendResult = rocketMQTemplate.sendMessageInTransaction(
+                    destination,
+                    message,
+                    null);
+            log.info("[事务消息: {}] half 消息发送成功", baseMessage.getEventName());
+            log.info("[{}] 消息发送结果：{}，消息 ID：{}，消息 Keys：{}", baseMessage.getEventName(), sendResult.getSendStatus(), sendResult.getMsgId(), baseMessage.getKeys());
+        } catch (Exception ex) {
+            log.error("[{}] 消息发送失败，消息体：{}", baseMessage.getEventName(), JSON.toJSONString(messageSendEvent), ex);
+            throw ex;
+        }
+        return sendResult;
+    }
 }

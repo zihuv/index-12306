@@ -1,16 +1,11 @@
 package com.zihuv.mq.domain;
 
-import lombok.*;
+import lombok.Data;
 
 import java.util.UUID;
 
 @Data
 public class MessageWrapper<T> {
-
-    /**
-     * 消息发送 Keys
-     */
-    private String keys;
 
     /**
      * 消息体
@@ -20,8 +15,7 @@ public class MessageWrapper<T> {
     public MessageWrapper() {
     }
 
-    public MessageWrapper(String keys, T message) {
-        this.keys = keys;
+    public MessageWrapper(T message) {
         this.message = message;
     }
 
