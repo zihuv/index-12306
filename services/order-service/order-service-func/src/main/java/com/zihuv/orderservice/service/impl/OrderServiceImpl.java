@@ -1,21 +1,24 @@
 package com.zihuv.orderservice.service.impl;
 
 import cn.hutool.core.date.LocalDateTimeUtil;
+import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zihuv.base.util.JSON;
 import com.zihuv.cache.DistributedCache;
 import com.zihuv.convention.exception.ServiceException;
-import com.zihuv.orderservice.common.constant.RedisKeyConstant;
 import com.zihuv.orderservice.common.enums.OrderStatusEnum;
 import com.zihuv.orderservice.mapper.OrderMapper;
 import com.zihuv.orderservice.model.dto.PassengerInfoDTO;
 import com.zihuv.orderservice.model.entity.Order;
 import com.zihuv.orderservice.model.param.TicketOrderCreateParam;
+import com.zihuv.orderservice.model.param.TicketOrderUpdateStatusParam;
 import com.zihuv.orderservice.model.vo.OrderVO;
 import com.zihuv.orderservice.mq.event.DelayCloseOrderEvent;
+import com.zihuv.orderservice.mq.event.RefundEvent;
 import com.zihuv.orderservice.mq.producer.DelayCloseOrderSendProducer;
+import com.zihuv.orderservice.mq.producer.RefundSendProducer;
 import com.zihuv.orderservice.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +39,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     private final DistributedCache distributedCache;
     private final DelayCloseOrderSendProducer delayCloseOrderSendProducer;
+    private final RefundSendProducer refundSendProducer;
 
     @Value("${index-12306.tail-number-strategy:userId}")
     private String tailNumberStrategy;
@@ -77,6 +81,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 .orderNo(orderNo)
                 .passengerInfoDTO(passengerInfoDTO)
                 .trainNumber(requestParam.getTrainNumber())
+                .money(requestParam.getMoney())
                 .arrivalTime(requestParam.getArrivalTime())
                 .departureTime(requestParam.getDepartureTime())
                 .build();
@@ -107,6 +112,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setDeparture(delayCloseOrderEvent.getDeparture());
         order.setSource(0);
         order.setStatus(OrderStatusEnum.NOT_PAY.getCode());
+        order.setMoney(delayCloseOrderEvent.getMoney());
         order.setOrderTime(LocalDateTime.now());
         order.setTrainNumber(delayCloseOrderEvent.getTrainNumber());
         order.setArrival(delayCloseOrderEvent.getArrival());
@@ -119,23 +125,53 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
 
     @Override
     public void cancelOrder(String orderNo) {
-        // 在 db 中更新
+        cancelOrder(orderNo, OrderStatusEnum.CANCEL.getCode());
+    }
+
+    private void cancelOrder(String orderNo, Integer closeCode) {
+        // TODO 加上分布式锁，修改数据库订单状态。也可以使用 select for update
+        // TODO 校验订单状态顺序是为是正确的。
+        LambdaQueryWrapper<Order> lqw = new LambdaQueryWrapper<>();
+        lqw.eq(Order::getOrderNo, orderNo);
+        lqw.select(Order::getStatus);
+        Order order = this.getOne(lqw);
+        // 不允许在没有支付的情况下设置[退款]状态
+        if (order != null && OrderStatusEnum.REFUNDED.getCode().equals(closeCode)) {
+            if (order.getStatus().equals(OrderStatusEnum.SUCCESS.getCode())) {
+                throw new ServiceException(StrUtil.format("[取消订单] 订单状态错误。原状态：{} ，修改的状态：{}", order.getStatus(), closeCode));
+            }
+        }
+
         LambdaUpdateWrapper<Order> luw = new LambdaUpdateWrapper<>();
         luw.eq(Order::getOrderNo, orderNo);
-        luw.set(Order::getStatus, OrderStatusEnum.CANCEL.getCode());
+        luw.set(Order::getStatus, closeCode);
         this.update(luw);
     }
 
+    @Transactional(rollbackFor = Exception.class)
     @Override
-    public void closeOrder(String orderNo) {
+    public void closeOrder(String orderNo, Integer closeCode) {
         // 取消订单 != 关闭订单
         // 取消订单是用户主动关闭的，而关闭订单代表该订单生命周期结束。
-        // 当出现：取消订单，支付成功，订单过期 时，需要关闭订单
-        cancelOrder(orderNo);
-        distributedCache.put(RedisKeyConstant.ORDER_STATUS + orderNo, OrderStatusEnum.CLOSE.getCode());
-        // TODO 加上分布式锁，修改数据库订单状态
+        // 当出现：取消订单，支付成功，订单超时，退款 时，需要关闭订单
 
+        // 先修改订单状态为退款成功，再进行退款操作（相比多次退款，退款失败更容易被接受）
+        // 关闭订单
+        cancelOrder(orderNo, closeCode);
+        // 如果是退款，修改完订单状态后还要把钱也退退了
+        if (OrderStatusEnum.REFUNDED.getCode().equals(closeCode)) {
+            Order order = this.getById(orderNo);
+            RefundEvent refundEvent = new RefundEvent();
+            refundEvent.setOrderNo(orderNo);
+            // TODO 去流水数据库查询该订单的支付情况。或者直接丢个订单号过去？
+            refundEvent.setRefundAmount(order.getMoney());
+
+            // 将消息存储至本地消息表，并发送退款消息给支付服务（注意要添加事务）
+            refundSendProducer.saveAndSendMessage(refundEvent);
+            // TODO 退款掉单问题，订单状态修改和退款 使用定时任务查询。退款幂等，保证一个订单只退一次款
+        }
     }
+    // TODO 实现退款订单操作
 
     @Override
     public OrderVO queryOrder(String orderNo) {
@@ -162,5 +198,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         return orderVO;
     }
 
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void updateOrderStatus(TicketOrderUpdateStatusParam requestParam) {
+        LambdaUpdateWrapper<Order> luw = new LambdaUpdateWrapper<>();
+        luw.eq(Order::getOrderNo, requestParam.getOrderNo());
+        luw.set(Order::getStatus, requestParam.getOrderNo());
+        this.update(luw);
+    }
 
 }

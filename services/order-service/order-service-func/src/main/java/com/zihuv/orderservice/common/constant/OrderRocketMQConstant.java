@@ -14,4 +14,15 @@ public class OrderRocketMQConstant {
 
 
     public static final String ORDER_PRODUCER_GROUP = "ORDER_PRODUCER_GROUP";
+
+    /**
+     * 订单服务相关业务 Topic Key
+     */
+    public static final String ORDER_REFUND_TOPIC = "index12306_order-service_refund_topic";
+
+    /**
+     * 购票服务创建订单后延时关闭业务 Tag Key
+     */
+    public static final String ORDER_REFUND_TAG = "index12306_order-service_refund_tag";
+
 }

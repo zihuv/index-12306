@@ -41,6 +41,11 @@ public class TicketOrderCreateParam {
     private String arrival;
 
     /**
+     * 订单金额
+     */
+    private String money;
+
+    /**
      * 出发时间
      */
     private LocalDateTime departureTime;

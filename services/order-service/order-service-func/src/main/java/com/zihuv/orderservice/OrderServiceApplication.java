@@ -8,7 +8,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 @EnableAsync
 @EnableDiscoveryClient
-@MapperScan({"com.zihuv.orderservice.mapper", "com.zihuv.log.mapper"})
+@MapperScan({"com.zihuv.orderservice.mapper", "com.zihuv.log.mapper","com.zihuv.mq.db"})
 @SpringBootApplication
 public class OrderServiceApplication {
 

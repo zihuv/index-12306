@@ -6,40 +6,45 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zihuv.cache.DistributedCache;
+import com.zihuv.convention.exception.ServiceException;
+import com.zihuv.convention.result.Result;
+import com.zihuv.designpattern.chain.AbstractChainContext;
+import com.zihuv.orderservice.common.enums.OrderStatusEnum;
+import com.zihuv.orderservice.feign.OrderFeign;
+import com.zihuv.orderservice.model.param.TicketOrderCreateParam;
+import com.zihuv.ticketservice.common.constant.Index12306Constant;
 import com.zihuv.ticketservice.common.constant.RedisKeyConstant;
 import com.zihuv.ticketservice.common.enums.TicketChainMarkEnum;
 import com.zihuv.ticketservice.mapper.TicketMapper;
 import com.zihuv.ticketservice.model.dto.RouteDTO;
 import com.zihuv.ticketservice.model.dto.SeatTypeCountDTO;
+import com.zihuv.ticketservice.model.dto.TicketPurchaseDTO;
 import com.zihuv.ticketservice.model.entity.Station;
 import com.zihuv.ticketservice.model.entity.Ticket;
+import com.zihuv.ticketservice.model.entity.Train;
 import com.zihuv.ticketservice.model.entity.TrainStation;
 import com.zihuv.ticketservice.model.param.TicketPageQueryParam;
 import com.zihuv.ticketservice.model.param.TicketPurchaseDetailParam;
-import com.zihuv.ticketservice.model.vo.TicketPageQueryVO;
-import com.zihuv.convention.exception.ServiceException;
-import com.zihuv.convention.result.Result;
-import com.zihuv.designpattern.chain.AbstractChainContext;
-import com.zihuv.orderservice.feign.OrderFeign;
-import com.zihuv.orderservice.model.param.TicketOrderCreateParam;
-import com.zihuv.ticketservice.common.constant.Index12306Constant;
-import com.zihuv.ticketservice.model.dto.TicketPurchaseDTO;
 import com.zihuv.ticketservice.model.vo.TicketOrderDetailVO;
-import com.zihuv.ticketservice.model.entity.Train;
+import com.zihuv.ticketservice.model.vo.TicketPageQueryVO;
 import com.zihuv.ticketservice.model.vo.TicketPurchaseVO;
 import com.zihuv.ticketservice.service.*;
 import com.zihuv.ticketservice.service.select.TrainSeatTypeSelector;
 import com.zihuv.ticketservice.service.tokenbucket.TicketAvailabilityTokenBucket;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> implements TicketService {
@@ -125,8 +130,6 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
         }
         // 挑选座位
         List<TicketPurchaseDTO> selectSeat = trainSeatTypeSelector.select(requestParam);
-
-        System.out.println(selectSeat);
         // 对座位类型映射
 
         // 对座位加锁，防止同个座位被超卖
@@ -152,6 +155,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
             ticketOrderCreateParam.setArrival(requestParam.getArrival());
             ticketOrderCreateParam.setDepartureTime(train.getDepartureTime());
             ticketOrderCreateParam.setArrivalTime(train.getArrivalTime());
+            ticketOrderCreateParam.setMoney(String.valueOf(ticketPurchaseDTO.getPrice()));
             // 发送创建订单请求
             Result<String> orderResponse = orderFeign.createOrder(ticketOrderCreateParam);
             if (StrUtil.isBlank(orderResponse.getData())) {
@@ -176,6 +180,25 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
         TicketPurchaseVO ticketPurchaseVO = new TicketPurchaseVO();
         ticketPurchaseVO.setTicketOrderDetails(ticketOrderDetailVOList);
         return ticketPurchaseVO;
+    }
+
+    @Override
+    public Object returnTickets() {
+        // 退票的前提条件是订单创建成功且票钱已经支付
+        // 所以退票需要将修改订单状态为“已退款”并退钱
+        // 这两个操作必须为原子性（加分布式锁）
+        String orderNo = "231119339648577392";
+
+        // 回滚库存（事务） -> 修改订单状态 -> 退款
+        // TODO 回滚库存
+        orderFeign.closeOrder(orderNo, OrderStatusEnum.REFUNDED.getCode());
+
+
+        // 对令牌桶回滚，限流应该是对所有请求都限流
+        // 限流的粒度。对整体限流和对某个列车的车票进行限流
+        // 重构令牌桶。令牌桶应该会随时间自动补充令牌
+
+        return null;
     }
 
     @Transactional(rollbackFor = Throwable.class)

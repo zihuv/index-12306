@@ -73,6 +73,11 @@ public class Order extends BaseDO {
     private Integer payType;
 
     /**
+     * 订单金额
+     */
+    private String money;
+
+    /**
      * 支付时间
      */
     private LocalDateTime payTime;

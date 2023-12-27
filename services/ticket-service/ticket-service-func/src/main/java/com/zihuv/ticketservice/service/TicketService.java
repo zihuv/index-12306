@@ -14,4 +14,6 @@ public interface TicketService extends IService<Ticket> {
     List<TicketPageQueryVO> pageTicketQuery(TicketPageQueryParam ticketPageQueryParam);
 
     TicketPurchaseVO purchaseTickets(TicketPurchaseDetailParam purchaseTicket);
+
+    Object returnTickets();
 }
