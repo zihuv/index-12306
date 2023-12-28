@@ -31,7 +31,6 @@ public class DelayCloseOrderTransactionListenerImpl implements RocketMQLocalTran
         MessageWrapper<?> messageWrapper = JSON.toBean((byte[]) msg.getPayload(), MessageWrapper.class);
         String jsonStr = JSON.toJsonStr(messageWrapper.getMessage());
         DelayCloseOrderEvent delayCloseOrderEvent = JSON.toBean(jsonStr, DelayCloseOrderEvent.class);
-        System.out.println(delayCloseOrderEvent);
         try {
             // 处理业务
             orderService.saveOrder(delayCloseOrderEvent);

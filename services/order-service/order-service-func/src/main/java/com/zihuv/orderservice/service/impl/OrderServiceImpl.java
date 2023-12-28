@@ -104,7 +104,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public void saveOrder(DelayCloseOrderEvent delayCloseOrderEvent) {
         // 创建订单
         Order order = new Order();
-        String orderNo = this.getOrderNo(Long.parseLong(delayCloseOrderEvent.getOrderNo()));
+        String orderNo = delayCloseOrderEvent.getOrderNo();
         order.setOrderNo(orderNo);
         order.setUserId(String.valueOf(delayCloseOrderEvent.getPassengerInfoDTO().getUserId()));
         order.setRealName(delayCloseOrderEvent.getPassengerInfoDTO().getRealName());
