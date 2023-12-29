@@ -9,7 +9,18 @@ import java.util.function.Supplier;
 @Slf4j
 public class OpenFeignUtil {
 
-    public static Result<?> send(Supplier<?> supplier, String errorMessage) {
+    public static void send(Supplier<?> supplier, String errorMessage) {
+        try {
+            getResult(supplier, errorMessage);
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            log.error(errorMessage);
+            throw e;
+        }
+    }
+
+    public static Result<?> sendAndReceive(Supplier<?> supplier, String errorMessage) {
         try {
             return getResult(supplier, errorMessage);
         } catch (ServiceException e) {
@@ -20,7 +31,7 @@ public class OpenFeignUtil {
         }
     }
 
-    public static <T> T send(Supplier<?> supplier, String errorMessage, Class<T> clazz) {
+    public static <T> T sendAndReceive(Supplier<?> supplier, String errorMessage, Class<T> clazz) {
         try {
             Result<?> result = getResult(supplier, errorMessage);
             T t = clazz.isInstance(result.getData()) ? clazz.cast(result.getData()) : null;
