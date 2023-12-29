@@ -1,6 +1,7 @@
 package com.zihuv.orderservice.controller;
 
 import com.zihuv.convention.result.Result;
+import com.zihuv.orderservice.model.param.CloseOrderParam;
 import com.zihuv.orderservice.model.param.TicketOrderCreateParam;
 import com.zihuv.orderservice.model.param.TicketOrderUpdateStatusParam;
 import com.zihuv.orderservice.model.vo.OrderVO;
@@ -50,8 +51,8 @@ public class OrderController {
      */
     @Operation(summary = "关闭订单")
     @PostMapping("/api/order-service/order/close")
-    public Result<?> closeOrder(@RequestBody String orderNo, @RequestBody Integer closeCode) {
-        orderService.closeOrder(orderNo, closeCode);
+    public Result<?> closeOrder(@RequestBody CloseOrderParam requestParam) {
+        orderService.closeOrder(requestParam.getOrderNo(), requestParam.getCloseCode());
         return Result.success();
     }
 

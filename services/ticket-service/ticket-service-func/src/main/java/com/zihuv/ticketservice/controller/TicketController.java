@@ -6,7 +6,6 @@ import com.zihuv.idempotent.enums.IdempotentSceneEnum;
 import com.zihuv.idempotent.enums.IdempotentTypeEnum;
 import com.zihuv.index12306.frameworks.starter.user.constant.UserContextConstant;
 import com.zihuv.log.annotation.ILog;
-import com.zihuv.orderservice.feign.OrderFeign;
 import com.zihuv.ticketservice.common.constant.IdempotentConstant;
 import com.zihuv.ticketservice.model.param.TicketPageQueryParam;
 import com.zihuv.ticketservice.model.param.TicketPurchaseDetailParam;
@@ -17,9 +16,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -59,8 +56,6 @@ public class TicketController {
         return Result.success(ticketService.purchaseTickets(purchaseTicket));
     }
 
-    private final OrderFeign orderFeign;
-
     @ILog
 //    @Idempotent(
 //            uniqueKeyPrefix = IdempotentConstant.PURCHASE_TICKETS,
@@ -70,8 +65,9 @@ public class TicketController {
 //            type = IdempotentTypeEnum.SPEL
 //    )
     @Operation(summary = "退票")
-    @PostMapping("/api/ticket-service/ticket/return")
-    public Result<?> returnTickets(@RequestBody TicketPurchaseDetailParam purchaseTicket) {
-        return Result.success(ticketService.returnTickets());
+    @GetMapping("/api/ticket-service/ticket/return")
+    public Result<?> returnTickets(@RequestParam String orderNo) {
+        ticketService.returnTickets(orderNo);
+        return Result.success();
     }
 }

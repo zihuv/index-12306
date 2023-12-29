@@ -11,6 +11,7 @@ import com.zihuv.convention.result.Result;
 import com.zihuv.designpattern.chain.AbstractChainContext;
 import com.zihuv.orderservice.common.enums.OrderStatusEnum;
 import com.zihuv.orderservice.feign.OrderFeign;
+import com.zihuv.orderservice.model.param.CloseOrderParam;
 import com.zihuv.orderservice.model.param.TicketOrderCreateParam;
 import com.zihuv.ticketservice.common.constant.Index12306Constant;
 import com.zihuv.ticketservice.common.constant.RedisKeyConstant;
@@ -31,6 +32,7 @@ import com.zihuv.ticketservice.model.vo.TicketPurchaseVO;
 import com.zihuv.ticketservice.service.*;
 import com.zihuv.ticketservice.service.select.TrainSeatTypeSelector;
 import com.zihuv.ticketservice.service.tokenbucket.TicketAvailabilityTokenBucket;
+import com.zihuv.web.utils.OpenFeignUtil;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -183,22 +185,25 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
     }
 
     @Override
-    public Object returnTickets() {
+    public void returnTickets(String orderNo) {
         // 退票的前提条件是订单创建成功且票钱已经支付
         // 所以退票需要将修改订单状态为“已退款”并退钱
         // 这两个操作必须为原子性（加分布式锁）
-        String orderNo = "231119339648577392";
 
         // 回滚库存（事务） -> 修改订单状态 -> 退款
         // TODO 回滚库存
-        orderFeign.closeOrder(orderNo, OrderStatusEnum.REFUNDED.getCode());
+        CloseOrderParam closeOrderParam = new CloseOrderParam();
+        closeOrderParam.setOrderNo(orderNo);
+        closeOrderParam.setCloseCode(OrderStatusEnum.REFUNDED.getCode());
 
+        OpenFeignUtil.send(
+                () -> orderFeign.closeOrder(closeOrderParam),
+                StrUtil.format("[退票服务] 订单号：{} 退票失败", orderNo));
 
         // 对令牌桶回滚，限流应该是对所有请求都限流
         // 限流的粒度。对整体限流和对某个列车的车票进行限流
         // 重构令牌桶。令牌桶应该会随时间自动补充令牌
 
-        return null;
     }
 
     @Transactional(rollbackFor = Throwable.class)

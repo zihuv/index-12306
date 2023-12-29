@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @EnableAsync
 @EnableDiscoveryClient
 @MapperScan({"com.zihuv.payservice.mapper", "com.zihuv.log.mapper"})
-@EnableFeignClients(basePackages = {"com.zihuv.payservice.feign"})
+@EnableFeignClients(basePackages = {"com.zihuv.payservice.feign","com.zihuv.orderservice.feign"})
 @SpringBootApplication
 public class PayServiceApplication {
 

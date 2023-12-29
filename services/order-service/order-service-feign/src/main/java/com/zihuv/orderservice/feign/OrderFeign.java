@@ -1,6 +1,7 @@
 package com.zihuv.orderservice.feign;
 
 import com.zihuv.convention.result.Result;
+import com.zihuv.orderservice.model.param.CloseOrderParam;
 import com.zihuv.orderservice.model.param.TicketOrderCreateParam;
 import com.zihuv.orderservice.model.param.TicketOrderUpdateStatusParam;
 import com.zihuv.orderservice.model.vo.OrderVO;
@@ -23,7 +24,7 @@ public interface OrderFeign {
      * 关闭订单
      */
     @PostMapping("/api/order-service/order/close")
-    Result<?> closeOrder(@RequestBody String orderNo, @RequestBody Integer closeCode);
+    Result<?> closeOrder(@RequestBody CloseOrderParam requestParam);
 
     /**
      * 查询订单

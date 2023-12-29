@@ -59,4 +59,13 @@ public enum OrderStatusEnum {
      * 订单状态
      */
     private final String type;
+
+    public static String getTypeByCode(Integer code) {
+        for (OrderStatusEnum status : OrderStatusEnum.values()) {
+            if (status.getCode().equals(code)) {
+                return status.getType();
+            }
+        }
+        return null;
+    }
 }

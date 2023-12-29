@@ -22,14 +22,11 @@ import com.zihuv.orderservice.mq.producer.RefundSendProducer;
 import com.zihuv.orderservice.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.client.producer.SendResult;
-import org.apache.rocketmq.client.producer.SendStatus;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Slf4j
@@ -86,15 +83,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                 .departureTime(requestParam.getDepartureTime())
                 .build();
         // 创建订单并支付后延时关闭订单消息
-        try {
-            SendResult sendResult = delayCloseOrderSendProducer.sendTransactionalMessage(delayCloseOrderEvent);
-            if (!Objects.equals(sendResult.getSendStatus(), SendStatus.SEND_OK)) {
-                throw new ServiceException("[延迟队列] 投递延迟关闭订单消息队列失败");
-            }
-        } catch (Throwable e) {
-            log.error("[延迟队列] 发送订单消息延迟队列发生错误，请求参数：{}", JSON.toJsonStr(requestParam), e);
-            throw e;
-        }
+        this.saveOrder(delayCloseOrderEvent);
+        delayCloseOrderSendProducer.sendMessage(delayCloseOrderEvent);
+
         log.info("[创建订单] 订单创建成功，参数：" + JSON.toJsonStr(requestParam));
         return orderNo;
     }
@@ -118,9 +109,8 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         order.setArrival(delayCloseOrderEvent.getArrival());
         order.setDepartureTime(delayCloseOrderEvent.getDepartureTime());
         order.setArrivalTime(delayCloseOrderEvent.getArrivalTime());
+        order.setMoney("100");
         this.save(order);
-        // TODO 插入订单事务表
-
     }
 
     @Override
@@ -137,8 +127,20 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         Order order = this.getOne(lqw);
         // 不允许在没有支付的情况下设置[退款]状态
         if (order != null && OrderStatusEnum.REFUNDED.getCode().equals(closeCode)) {
+            if (!order.getStatus().equals(OrderStatusEnum.SUCCESS.getCode())) {
+                throw new ServiceException(
+                        StrUtil.format(
+                                "[订单退款] 订单状态错误。原状态：<{}>；修改状态：<{}>",
+                                OrderStatusEnum.getTypeByCode(order.getStatus()),
+                                OrderStatusEnum.getTypeByCode(closeCode)));
+            }
+        }
+
+        // 如果是订单过期消息，在订单状态为支付的情况下需要丢弃
+        if (order != null && OrderStatusEnum.TIMEOUT.getCode().equals(closeCode)) {
             if (order.getStatus().equals(OrderStatusEnum.SUCCESS.getCode())) {
-                throw new ServiceException(StrUtil.format("[取消订单] 订单状态错误。原状态：{} ，修改的状态：{}", order.getStatus(), closeCode));
+                log.info("[订单过期] 订单：{} 已经被支付，丢弃订单过期消息",orderNo);
+                return;
             }
         }
 
@@ -160,7 +162,13 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         cancelOrder(orderNo, closeCode);
         // 如果是退款，修改完订单状态后还要把钱也退退了
         if (OrderStatusEnum.REFUNDED.getCode().equals(closeCode)) {
-            Order order = this.getById(orderNo);
+            LambdaQueryWrapper<Order> lqw = new LambdaQueryWrapper<>();
+            lqw.eq(Order::getOrderNo, orderNo);
+            Order order = this.getOne(lqw);
+            if (order == null) {
+                throw new ServiceException(StrUtil.format("[关闭订单] 订单不存在，订单号：{}", orderNo));
+            }
+
             RefundEvent refundEvent = new RefundEvent();
             refundEvent.setOrderNo(orderNo);
             // TODO 去流水数据库查询该订单的支付情况。或者直接丢个订单号过去？
@@ -179,6 +187,9 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         LambdaQueryWrapper<Order> lqw = new LambdaQueryWrapper<>();
         lqw.eq(Order::getOrderNo, orderNo);
         Order order = this.getOne(lqw);
+        if (order == null) {
+            throw new ServiceException(StrUtil.format("[订单查询] 订单号：{}，不存在", orderNo));
+        }
 
         OrderVO orderVO = new OrderVO();
         orderVO.setOrderNo(order.getOrderNo());
@@ -203,7 +214,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
     public void updateOrderStatus(TicketOrderUpdateStatusParam requestParam) {
         LambdaUpdateWrapper<Order> luw = new LambdaUpdateWrapper<>();
         luw.eq(Order::getOrderNo, requestParam.getOrderNo());
-        luw.set(Order::getStatus, requestParam.getOrderNo());
+        luw.set(Order::getStatus, requestParam.getStatus());
         this.update(luw);
     }
 

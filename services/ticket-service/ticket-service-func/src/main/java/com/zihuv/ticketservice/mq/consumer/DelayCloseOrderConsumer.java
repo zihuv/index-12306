@@ -2,12 +2,13 @@ package com.zihuv.ticketservice.mq.consumer;
 
 import cn.hutool.core.util.StrUtil;
 import com.zihuv.base.util.JSON;
-import com.zihuv.convention.exception.ServiceException;
-import com.zihuv.convention.result.Result;
 import com.zihuv.mq.domain.MessageWrapper;
+import com.zihuv.orderservice.common.enums.OrderStatusEnum;
 import com.zihuv.orderservice.feign.OrderFeign;
+import com.zihuv.orderservice.model.param.CloseOrderParam;
 import com.zihuv.orderservice.mq.event.DelayCloseOrderEvent;
 import com.zihuv.ticketservice.common.constant.TicketRocketMQConstant;
+import com.zihuv.web.utils.OpenFeignUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -47,16 +48,14 @@ public final class DelayCloseOrderConsumer implements RocketMQListener<MessageWr
             return;
         }
 
-        try {
-            // 订单过期，关闭订单
-            Result<?> result = orderFeign.closeOrder(orderNo);
-            if (!result.isSuccess()) {
-                throw new ServiceException(StrUtil.format("[延迟关闭订单] 订单号：{} 远程调用订单服务失败", orderNo));
-            }
-        } catch (Exception e) {
-            log.error("[延迟关闭订单] 订单号：{} 远程调用订单服务失败", orderNo);
-            throw e;
-        }
+        CloseOrderParam closeOrderParam = new CloseOrderParam();
+        closeOrderParam.setOrderNo(orderNo);
+        closeOrderParam.setCloseCode(OrderStatusEnum.TIMEOUT.getCode());
+
+        // 订单过期，关闭订单
+        OpenFeignUtil.send(
+                () -> orderFeign.closeOrder(closeOrderParam),
+                StrUtil.format("[延迟关闭订单] 订单号：{} 远程调用订单服务失败", orderNo));
 
         // TODO 调用车票服务，回滚列车DB座位状态，回滚列车Cache余票
         // TODO 当订单过期时，不允许支付。检查 key

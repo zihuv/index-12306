@@ -15,5 +15,5 @@ public interface TicketService extends IService<Ticket> {
 
     TicketPurchaseVO purchaseTickets(TicketPurchaseDetailParam purchaseTicket);
 
-    Object returnTickets();
+    void returnTickets(String orderNo);
 }
