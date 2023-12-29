@@ -1,21 +1,28 @@
 package com.zihuv.mq.core;
 
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
+import com.zihuv.convention.exception.ServiceException;
 import com.zihuv.mq.db.MessageMapper;
 import com.zihuv.mq.domain.BaseMessage;
 import com.zihuv.mq.domain.LocalMessage;
 import com.zihuv.mq.domain.MessageWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.client.producer.SendResult;
+import org.apache.rocketmq.client.producer.SendStatus;
 import org.apache.rocketmq.common.message.MessageConst;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.support.MessageBuilder;
+import org.springframework.stereotype.Component;
+
+import java.util.Objects;
 
 /**
  * RocketMQ 抽象公共发送消息组件
  */
+@Component
 @Slf4j
 public abstract class AbstractCommonSendProduceTemplate<T> {
 
@@ -85,6 +92,9 @@ public abstract class AbstractCommonSendProduceTemplate<T> {
                     baseMessage.getSentTimeout(),
                     baseMessage.getDelayLevel()
             );
+            if (!Objects.equals(sendResult.getSendStatus(), SendStatus.SEND_OK)) {
+                throw new ServiceException(StrUtil.format("[{}] 消息发送失败，消息体：{}", baseMessage.getEventName(), JSON.toJSONString(baseMessage)));
+            }
             log.info("[{}] 消息发送结果：{}，消息 ID：{}，消息 Keys：{}", baseMessage.getEventName(), sendResult.getSendStatus(), sendResult.getMsgId(), baseMessage.getKeys());
         } catch (Exception ex) {
             log.error("[{}] 消息发送失败，消息体：{}", baseMessage.getEventName(), JSON.toJSONString(baseMessage), ex);
@@ -130,7 +140,9 @@ public abstract class AbstractCommonSendProduceTemplate<T> {
                     destination,
                     message,
                     null);
-            log.info("[事务消息: {}] half 消息发送成功", baseMessage.getEventName());
+            if (!Objects.equals(sendResult.getSendStatus(), SendStatus.SEND_OK)) {
+                throw new ServiceException(StrUtil.format("[{}] 消息发送失败，消息体：{}", baseMessage.getEventName(), JSON.toJSONString(baseMessage)));
+            }
             log.info("[{}] 消息发送结果：{}，消息 ID：{}，消息 Keys：{}", baseMessage.getEventName(), sendResult.getSendStatus(), sendResult.getMsgId(), baseMessage.getKeys());
         } catch (Exception ex) {
             log.error("[{}] 消息发送失败，消息体：{}", baseMessage.getEventName(), JSON.toJSONString(baseMessage), ex);
