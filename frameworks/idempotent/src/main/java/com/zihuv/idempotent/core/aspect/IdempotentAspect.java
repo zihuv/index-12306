@@ -14,7 +14,6 @@ public class IdempotentAspect {
     public Object idempotentHandler(ProceedingJoinPoint joinPoint, Idempotent idempotent) throws Throwable {
         IdempotentExecuteHandler instance = IdempotentExecuteHandlerFactory.getInstance(idempotent.scene(), idempotent.type());
 
-        // TODO 对 MQ 消息的幂等性处理
         Object resultObj;
         try {
             instance.execute(joinPoint, idempotent);

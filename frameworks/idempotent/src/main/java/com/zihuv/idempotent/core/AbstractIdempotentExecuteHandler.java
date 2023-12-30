@@ -22,7 +22,7 @@ public abstract class AbstractIdempotentExecuteHandler implements IdempotentExec
      * @param idempotent 幂等注解
      */
     public void execute(ProceedingJoinPoint joinPoint, Idempotent idempotent) {
-        // 模板方法模式：构建幂等参数对象
+        // 模板模式：构建幂等参数对象
         String lockKey = buildLockKey(joinPoint, idempotent);
 
         IdempotentParamWrapper idempotentParamWrapper = new IdempotentParamWrapper();

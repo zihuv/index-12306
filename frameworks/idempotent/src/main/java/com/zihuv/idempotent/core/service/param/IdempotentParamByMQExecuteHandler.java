@@ -5,6 +5,7 @@ import cn.hutool.crypto.digest.DigestUtil;
 import com.zihuv.convention.exception.ClientException;
 import com.zihuv.idempotent.annotation.Idempotent;
 import com.zihuv.idempotent.core.AbstractIdempotentExecuteHandler;
+import com.zihuv.idempotent.core.IdempotentExecuteHandler;
 import com.zihuv.idempotent.pojo.IdempotentParamWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +17,7 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
-public class IdempotentParamByMQExecuteHandler extends AbstractIdempotentExecuteHandler implements IdempotentParamService {
+public class IdempotentParamByMQExecuteHandler extends AbstractIdempotentExecuteHandler implements IdempotentExecuteHandler {
 
     private final RedisTemplate<String, Object> redisTemplate;
 

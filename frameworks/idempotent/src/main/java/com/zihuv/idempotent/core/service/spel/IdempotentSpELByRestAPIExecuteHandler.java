@@ -5,6 +5,7 @@ import cn.hutool.crypto.digest.DigestUtil;
 import com.zihuv.convention.exception.ClientException;
 import com.zihuv.idempotent.annotation.Idempotent;
 import com.zihuv.idempotent.core.AbstractIdempotentExecuteHandler;
+import com.zihuv.idempotent.core.IdempotentExecuteHandler;
 import com.zihuv.idempotent.pojo.IdempotentParamWrapper;
 import com.zihuv.idempotent.utils.SpELUtil;
 import lombok.RequiredArgsConstructor;
@@ -18,13 +19,13 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
-public class IdempotentSpELByRestAPIExecuteHandler extends AbstractIdempotentExecuteHandler implements IdempotentSpELService {
+public class IdempotentSpELByRestAPIExecuteHandler extends AbstractIdempotentExecuteHandler implements IdempotentExecuteHandler {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     protected String buildLockKey(ProceedingJoinPoint joinPoint, Idempotent idempotent) {
-        // key = keyPrefix + spEL + md5 请求参数
+        // key = spEL + keyPrefix  + md5 请求参数
         String keyPrefix = idempotent.uniqueKeyPrefix();
         String digestArgsByMd5 = DigestUtil.md5Hex(Arrays.toString(joinPoint.getArgs()));
         String spELKey = (String) SpELUtil.parseKey(idempotent.key(), ((MethodSignature) joinPoint.getSignature()).getMethod(), joinPoint.getArgs());

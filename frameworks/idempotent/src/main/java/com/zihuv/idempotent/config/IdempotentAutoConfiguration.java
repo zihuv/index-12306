@@ -3,9 +3,7 @@ package com.zihuv.idempotent.config;
 import com.zihuv.idempotent.core.aspect.IdempotentAspect;
 import com.zihuv.idempotent.core.service.param.IdempotentParamByMQExecuteHandler;
 import com.zihuv.idempotent.core.service.param.IdempotentParamExecuteHandler;
-import com.zihuv.idempotent.core.service.param.IdempotentParamService;
 import com.zihuv.idempotent.core.service.spel.IdempotentSpELByRestAPIExecuteHandler;
-import com.zihuv.idempotent.core.service.spel.IdempotentSpELService;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +24,7 @@ public class IdempotentAutoConfiguration {
      * 参数方式幂等实现，基于 RestAPI 场景
      */
     @Bean
-    public IdempotentParamService idempotentParamService(RedisTemplate<String, Object> redisTemplate) {
+    public IdempotentParamExecuteHandler idempotentParamExecuteHandler(RedisTemplate<String, Object> redisTemplate) {
         return new IdempotentParamExecuteHandler(redisTemplate);
     }
 
@@ -34,7 +32,7 @@ public class IdempotentAutoConfiguration {
      * SpEL 方式幂等实现，基于 RestAPI 场景
      */
     @Bean
-    public IdempotentSpELService idempotentSpELByRestAPIExecuteHandler(RedisTemplate<String, Object> redisTemplate) {
+    public IdempotentSpELByRestAPIExecuteHandler idempotentSpELByRestAPIExecuteHandler(RedisTemplate<String, Object> redisTemplate) {
         return new IdempotentSpELByRestAPIExecuteHandler(redisTemplate);
     }
 
