@@ -1,4 +1,4 @@
-package com.zihuv.idempotent.core.service.param;
+package com.zihuv.idempotent.core.service.spel;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
@@ -7,6 +7,7 @@ import com.zihuv.idempotent.annotation.Idempotent;
 import com.zihuv.idempotent.core.AbstractIdempotentExecuteHandler;
 import com.zihuv.idempotent.core.IdempotentExecuteHandler;
 import com.zihuv.idempotent.pojo.IdempotentParamWrapper;
+import com.zihuv.idempotent.utils.SpELUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -17,13 +18,14 @@ import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
-public class IdempotentParamByMQExecuteHandler extends AbstractIdempotentExecuteHandler implements IdempotentExecuteHandler {
+public class IdempotentSpELByMQExecuteHandler extends AbstractIdempotentExecuteHandler implements IdempotentExecuteHandler {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     protected String buildLockKey(ProceedingJoinPoint joinPoint, Idempotent idempotent) {
-        return StrUtil.format("idempotent:mq:{}:message:{}", idempotent.uniqueKeyPrefix(), calcArgsSHA256(joinPoint));
+        String message = (String) SpELUtil.parseKey(idempotent.key());
+        return StrUtil.format("idempotent:mq:{}:message:{}", idempotent.uniqueKeyPrefix(), calcArgsSHA256(message));
     }
 
     @Override
@@ -37,7 +39,7 @@ public class IdempotentParamByMQExecuteHandler extends AbstractIdempotentExecute
         }
     }
 
-    private String calcArgsSHA256(ProceedingJoinPoint joinPoint) {
-        return DigestUtil.sha256Hex(Arrays.toString(joinPoint.getArgs()));
+    private String calcArgsSHA256(String text) {
+        return DigestUtil.sha256Hex(text);
     }
 }

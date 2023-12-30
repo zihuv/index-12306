@@ -11,7 +11,6 @@ import com.zihuv.idempotent.utils.SpELUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.Arrays;
@@ -28,7 +27,7 @@ public class IdempotentSpELByRestAPIExecuteHandler extends AbstractIdempotentExe
         // key = spEL + keyPrefix  + md5 请求参数
         String keyPrefix = idempotent.uniqueKeyPrefix();
         String digestArgsByMd5 = DigestUtil.md5Hex(Arrays.toString(joinPoint.getArgs()));
-        String spELKey = (String) SpELUtil.parseKey(idempotent.key(), ((MethodSignature) joinPoint.getSignature()).getMethod(), joinPoint.getArgs());
+        String spELKey = (String) SpELUtil.parseKey(idempotent.key());
         return StrUtil.format("idempotent:spEL:{}:{}:md5:{}", spELKey, keyPrefix, digestArgsByMd5);
     }
 
