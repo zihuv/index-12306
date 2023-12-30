@@ -1,12 +1,13 @@
 package com.zihuv.idempotent.core.factory;
 
 import com.zihuv.base.context.ApplicationContextHolder;
+import com.zihuv.idempotent.core.IdempotentExecuteHandler;
+import com.zihuv.idempotent.core.service.param.IdempotentParamByMQExecuteHandler;
+import com.zihuv.idempotent.core.service.param.IdempotentParamExecuteHandler;
 import com.zihuv.idempotent.core.service.param.IdempotentParamService;
-import com.zihuv.idempotent.core.service.spel.IdempotentSpELByMQExecuteHandler;
 import com.zihuv.idempotent.core.service.spel.IdempotentSpELByRestAPIExecuteHandler;
 import com.zihuv.idempotent.enums.IdempotentSceneEnum;
 import com.zihuv.idempotent.enums.IdempotentTypeEnum;
-import com.zihuv.idempotent.core.IdempotentExecuteHandler;
 
 /**
  * 幂等执行处理器简单工厂
@@ -25,16 +26,12 @@ public class IdempotentExecuteHandlerFactory {
         switch (scene) {
             case RESTAPI -> {
                 switch (type) {
-                    case PARAM -> result = ApplicationContextHolder.getBean(IdempotentParamService.class);
+                    case PARAM -> result = ApplicationContextHolder.getBean(IdempotentParamExecuteHandler.class);
                     case SPEL -> result = ApplicationContextHolder.getBean(IdempotentSpELByRestAPIExecuteHandler.class);
-                    default -> {
-                    }
                 }
             }
             // TODO 处理 MQ 幂等性
-            case MQ -> result = ApplicationContextHolder.getBean(IdempotentSpELByMQExecuteHandler.class);
-            default -> {
-            }
+            case MQ -> result = ApplicationContextHolder.getBean(IdempotentParamByMQExecuteHandler.class);
         }
         return result;
     }

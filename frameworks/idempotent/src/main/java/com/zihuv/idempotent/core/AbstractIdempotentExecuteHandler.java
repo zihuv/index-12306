@@ -13,7 +13,7 @@ public abstract class AbstractIdempotentExecuteHandler implements IdempotentExec
      * @param idempotent 幂等性注解
      * @return 幂等参数包装器
      */
-    protected abstract String generateLockKey(ProceedingJoinPoint joinPoint, Idempotent idempotent);
+    protected abstract String buildLockKey(ProceedingJoinPoint joinPoint, Idempotent idempotent);
 
     /**
      * 执行幂等处理逻辑
@@ -23,7 +23,7 @@ public abstract class AbstractIdempotentExecuteHandler implements IdempotentExec
      */
     public void execute(ProceedingJoinPoint joinPoint, Idempotent idempotent) {
         // 模板方法模式：构建幂等参数对象
-        String lockKey = generateLockKey(joinPoint, idempotent);
+        String lockKey = buildLockKey(joinPoint, idempotent);
 
         IdempotentParamWrapper idempotentParamWrapper = new IdempotentParamWrapper();
         idempotentParamWrapper.setJoinPoint(joinPoint);
