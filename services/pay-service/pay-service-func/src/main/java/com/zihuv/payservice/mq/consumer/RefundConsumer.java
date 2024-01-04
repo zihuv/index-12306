@@ -2,6 +2,10 @@ package com.zihuv.payservice.mq.consumer;
 
 import cn.hutool.core.util.StrUtil;
 import com.zihuv.base.util.JSON;
+import com.zihuv.idempotent.annotation.Idempotent;
+import com.zihuv.idempotent.enums.IdempotentSceneEnum;
+import com.zihuv.idempotent.enums.IdempotentTypeEnum;
+import com.zihuv.mq.constant.MQSpELConstant;
 import com.zihuv.mq.domain.MessageWrapper;
 import com.zihuv.orderservice.mq.event.RefundEvent;
 import com.zihuv.payservice.common.constant.PayRocketMQConstant;
@@ -15,6 +19,8 @@ import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.stereotype.Component;
 
+import static com.zihuv.payservice.common.constant.IdempotentConstant.REFUND_CONSUMER_KEY;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -27,6 +33,13 @@ public class RefundConsumer implements RocketMQListener<MessageWrapper<RefundEve
 
     private final PayFeign payFeign;
 
+    @Idempotent(
+            uniqueKeyPrefix = REFUND_CONSUMER_KEY,
+            key = MQSpELConstant.GET_MESSAGE_SPEL,
+            type = IdempotentTypeEnum.SPEL,
+            scene = IdempotentSceneEnum.MQ,
+            keyTimeout = 5000L
+    )
     @Override
     public void onMessage(MessageWrapper<RefundEvent> message) {
         log.info("[订单退款] 消息开始消费：{}", JSON.toJsonStr(message));
@@ -41,6 +54,6 @@ public class RefundConsumer implements RocketMQListener<MessageWrapper<RefundEve
         // TODO 幂等消费消息；自己给自己发请求？
         OpenFeignUtil.send(
                 () -> payFeign.refund(refundParam),
-                StrUtil.format("[订单退款] 消息消费失败，消息体：{}", refundEvent));
+                StrUtil.format("[订单退款] 消息消费失败，消息体：{}", refundParam));
     }
 }

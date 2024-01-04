@@ -1,7 +1,7 @@
 package com.zihuv.idempotent.config;
 
 import com.zihuv.idempotent.core.aspect.IdempotentAspect;
-import com.zihuv.idempotent.core.service.spel.IdempotentSpELByMQExecuteHandler;
+import com.zihuv.idempotent.core.service.param.IdempotentByMQExecuteHandler;
 import com.zihuv.idempotent.core.service.param.IdempotentParamExecuteHandler;
 import com.zihuv.idempotent.core.service.spel.IdempotentSpELByRestAPIExecuteHandler;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -41,7 +41,7 @@ public class IdempotentAutoConfiguration {
      */
     @Bean
     @ConditionalOnMissingBean
-    public IdempotentSpELByMQExecuteHandler idempotentParamByMQExecuteHandler(RedisTemplate<String, Object> redisTemplate) {
-        return new IdempotentSpELByMQExecuteHandler(redisTemplate);
+    public IdempotentByMQExecuteHandler idempotentParamByMQExecuteHandler(RedisTemplate<String, Object> redisTemplate) {
+        return new IdempotentByMQExecuteHandler(redisTemplate);
     }
 }

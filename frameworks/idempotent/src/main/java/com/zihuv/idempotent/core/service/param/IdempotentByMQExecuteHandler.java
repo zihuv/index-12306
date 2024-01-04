@@ -1,30 +1,40 @@
-package com.zihuv.idempotent.core.service.spel;
+package com.zihuv.idempotent.core.service.param;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import com.zihuv.convention.exception.ClientException;
+import com.zihuv.convention.exception.ServiceException;
 import com.zihuv.idempotent.annotation.Idempotent;
 import com.zihuv.idempotent.core.AbstractIdempotentExecuteHandler;
 import com.zihuv.idempotent.core.IdempotentExecuteHandler;
 import com.zihuv.idempotent.pojo.IdempotentParamWrapper;
-import com.zihuv.idempotent.utils.SpELUtil;
+import com.zihuv.mq.domain.MessageWrapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.springframework.data.redis.core.RedisTemplate;
 
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @RequiredArgsConstructor
-public class IdempotentSpELByMQExecuteHandler extends AbstractIdempotentExecuteHandler implements IdempotentExecuteHandler {
+public class IdempotentByMQExecuteHandler extends AbstractIdempotentExecuteHandler implements IdempotentExecuteHandler {
 
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     protected String buildLockKey(ProceedingJoinPoint joinPoint, Idempotent idempotent) {
-        String message = (String) SpELUtil.parseKey(idempotent.key());
+        String message = "";
+        boolean success = false;
+        if (joinPoint.getArgs()[0] instanceof MessageWrapper<?> messageWrapper) {
+            message = String.valueOf(messageWrapper.getMessage());
+            if (StrUtil.isNotEmpty(message)) {
+                success = true;
+            }
+        }
+        if (!success) {
+            throw new ServiceException("[幂等组件][MQ 幂等] 消息转换为字符串失败");
+        }
         return StrUtil.format("idempotent:mq:{}:message:{}", idempotent.uniqueKeyPrefix(), calcArgsSHA256(message));
     }
 

@@ -2,6 +2,10 @@ package com.zihuv.ticketservice.mq.consumer;
 
 import cn.hutool.core.util.StrUtil;
 import com.zihuv.base.util.JSON;
+import com.zihuv.idempotent.annotation.Idempotent;
+import com.zihuv.idempotent.enums.IdempotentSceneEnum;
+import com.zihuv.idempotent.enums.IdempotentTypeEnum;
+import com.zihuv.mq.constant.MQSpELConstant;
 import com.zihuv.mq.domain.MessageWrapper;
 import com.zihuv.orderservice.common.enums.OrderStatusEnum;
 import com.zihuv.orderservice.feign.OrderFeign;
@@ -16,9 +20,7 @@ import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.concurrent.TimeUnit;
-
-import static com.zihuv.ticketservice.common.constant.IdempotentConstant.DELAY_CLOSE_ORDER;
+import static com.zihuv.ticketservice.common.constant.IdempotentConstant.DELAY_ClOSE_ORDER_CONSUMER_KEY;
 
 /**
  * 延迟关闭订单消费者
@@ -31,22 +33,23 @@ import static com.zihuv.ticketservice.common.constant.IdempotentConstant.DELAY_C
         selectorExpression = TicketRocketMQConstant.ORDER_DELAY_CLOSE_TAG_KEY,
         consumerGroup = TicketRocketMQConstant.TICKET_DELAY_CLOSE_CG_KEY
 )
-public final class DelayCloseOrderConsumer implements RocketMQListener<MessageWrapper<DelayCloseOrderEvent>> {
+public class DelayCloseOrderConsumer implements RocketMQListener<MessageWrapper<DelayCloseOrderEvent>> {
 
     private final OrderFeign orderFeign;
     private final RedisTemplate<String, Object> redisTemplate;
 
+    @Idempotent(
+            uniqueKeyPrefix = DELAY_ClOSE_ORDER_CONSUMER_KEY,
+            key = MQSpELConstant.GET_MESSAGE_SPEL,
+            type = IdempotentTypeEnum.SPEL,
+            scene = IdempotentSceneEnum.MQ,
+            keyTimeout = 1200L
+    )
     @Override
     public void onMessage(MessageWrapper<DelayCloseOrderEvent> message) {
         log.info("[延迟关闭订单] 开始消费：{}", JSON.toJsonStr(message));
         DelayCloseOrderEvent delayCloseOrderEvent = message.getMessage();
         String orderNo = delayCloseOrderEvent.getOrderNo();
-        // 加分布式锁，确保消息的幂等性
-        Boolean setValueSuccess = redisTemplate.opsForValue().setIfAbsent(DELAY_CLOSE_ORDER + orderNo, "", 20, TimeUnit.MINUTES);
-        if (!Boolean.TRUE.equals(setValueSuccess)) {
-            log.warn("[延迟关闭订单] 消息：{} 重复被发送", delayCloseOrderEvent);
-            return;
-        }
 
         CloseOrderParam closeOrderParam = new CloseOrderParam();
         closeOrderParam.setOrderNo(orderNo);

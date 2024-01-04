@@ -8,7 +8,13 @@ public class IdempotentConstant {
     public static final String PURCHASE_TICKETS = "index12306-ticket:idempotent:purchase-tickets";
 
     /**
-     * 延时订单幂等性
+     * 退票幂等性
      */
-    public static final String DELAY_CLOSE_ORDER = "index12306-order:idempotent:delay-close-order:";
+    public static final String RETURN_TICKETS = "index12306-ticket:idempotent:return-tickets";
+
+    /**
+     * 延时订单消费者幂等性
+     */
+    public static final String DELAY_ClOSE_ORDER_CONSUMER_KEY = "index12306-order:idempotent:delay-close-order:";
+
 }

@@ -2,7 +2,7 @@ package com.zihuv.idempotent.core.factory;
 
 import com.zihuv.base.context.ApplicationContextHolder;
 import com.zihuv.idempotent.core.IdempotentExecuteHandler;
-import com.zihuv.idempotent.core.service.spel.IdempotentSpELByMQExecuteHandler;
+import com.zihuv.idempotent.core.service.param.IdempotentByMQExecuteHandler;
 import com.zihuv.idempotent.core.service.param.IdempotentParamExecuteHandler;
 import com.zihuv.idempotent.core.service.spel.IdempotentSpELByRestAPIExecuteHandler;
 import com.zihuv.idempotent.enums.IdempotentSceneEnum;
@@ -29,7 +29,7 @@ public class IdempotentExecuteHandlerFactory {
                     case SPEL -> result = ApplicationContextHolder.getBean(IdempotentSpELByRestAPIExecuteHandler.class);
                 }
             }
-            case MQ -> result = ApplicationContextHolder.getBean(IdempotentSpELByMQExecuteHandler.class);
+            case MQ -> result = ApplicationContextHolder.getBean(IdempotentByMQExecuteHandler.class);
         }
         return result;
     }

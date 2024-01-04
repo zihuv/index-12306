@@ -18,7 +18,6 @@ public class SpELUtil {
     public static Object parseKey(String spEl) {
         ExpressionParser parser = new SpelExpressionParser();
         Expression exp = parser.parseExpression(spEl);
-
         return exp.getValue();
     }
 }
