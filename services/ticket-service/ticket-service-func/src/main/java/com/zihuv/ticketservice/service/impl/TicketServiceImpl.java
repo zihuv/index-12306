@@ -125,6 +125,7 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
         // 责任链模式，验证 1：参数不为空 2：参数是否有效 3：乘客是否重复买票
         purchaseTicketAbstractChainContext.handler(TicketChainMarkEnum.TRAIN_PURCHASE_TICKET_FILTER.name(), requestParam);
         // 从令牌桶中获取买票资格
+        // TODO 改造令牌桶
         // TODO 当座位字母代号已售尽时，是使用随机分配票，还是需要拿到 token 的
         boolean tokenResult = ticketAvailabilityTokenBucket.takeTokenFromBucket(requestParam);
         if (!tokenResult) {
@@ -159,14 +160,14 @@ public class TicketServiceImpl extends ServiceImpl<TicketMapper, Ticket> impleme
             ticketOrderCreateParam.setArrivalTime(train.getArrivalTime());
             ticketOrderCreateParam.setMoney(String.valueOf(ticketPurchaseDTO.getPrice()));
             // 发送创建订单请求
-            Result<String> orderResponse = orderFeign.createOrder(ticketOrderCreateParam);
-            if (StrUtil.isBlank(orderResponse.getData())) {
-                throw new ServiceException("订单号为空");
-            }
+            String orderNo = OpenFeignUtil.sendAndReceive(
+                    () -> orderFeign.createOrder(ticketOrderCreateParam),
+                    "[购票服务] 订单号为空",
+                    String.class);
 
             // 封装 VO
             TicketOrderDetailVO ticketOrderDetailVO = new TicketOrderDetailVO();
-            ticketOrderDetailVO.setOrderNo(orderResponse.getData());
+            ticketOrderDetailVO.setOrderNo(orderNo);
             ticketOrderDetailVO.setSeatType(ticketPurchaseDTO.getSeatType());
             ticketOrderDetailVO.setCarriageNumber(ticketPurchaseDTO.getCarriageNumber());
             ticketOrderDetailVO.setSeatNumber(ticketPurchaseDTO.getSeatNumber());

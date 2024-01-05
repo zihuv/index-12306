@@ -81,6 +81,11 @@ public class PayController {
      * @param refundParam 退款参数
      * @return com.zihuv.convention.result.Result<?>
      */
+    @Idempotent(
+            uniqueKeyPrefix = IdempotentConstant.REFUND,
+            type = IdempotentTypeEnum.PARAM,
+            scene = IdempotentSceneEnum.RESTAPI
+    )
     @Operation(summary = "退款")
     @PostMapping("/api/pay-service/refund")
     public Result<?> refund(@RequestBody RefundParam refundParam) {

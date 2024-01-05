@@ -5,6 +5,7 @@ import com.zihuv.idempotent.annotation.Idempotent;
 import com.zihuv.idempotent.enums.IdempotentSceneEnum;
 import com.zihuv.idempotent.enums.IdempotentTypeEnum;
 import com.zihuv.index12306.frameworks.starter.user.constant.UserContextConstant;
+import com.zihuv.limiter.annotation.Limiter;
 import com.zihuv.log.annotation.ILog;
 import com.zihuv.ticketservice.common.constant.IdempotentConstant;
 import com.zihuv.ticketservice.model.param.TicketPageQueryParam;
@@ -50,6 +51,9 @@ public class TicketController {
             scene = IdempotentSceneEnum.RESTAPI,
             type = IdempotentTypeEnum.SPEL
     )
+    @Limiter(
+            key = "TicketController#purchaseTickets",
+            permitsPerSecond = 1000)
     @Operation(summary = "购买车票")
     @PostMapping("/api/ticket-service/ticket/purchase")
     public Result<TicketPurchaseVO> purchaseTickets(@RequestBody TicketPurchaseDetailParam purchaseTicket) {
@@ -57,13 +61,13 @@ public class TicketController {
     }
 
     @ILog
-//    @Idempotent(
-//            uniqueKeyPrefix = IdempotentConstant.PURCHASE_TICKETS,
-//            key = UserContextConstant.USER_CONTEXT_SPEL,
-//            message = "正在执行下单流程，请稍后...",
-//            scene = IdempotentSceneEnum.RESTAPI,
-//            type = IdempotentTypeEnum.SPEL
-//    )
+    @Idempotent(
+            uniqueKeyPrefix = IdempotentConstant.RETURN_TICKETS,
+            key = UserContextConstant.USER_CONTEXT_SPEL,
+            message = "正在执行退票流程，请稍后...",
+            scene = IdempotentSceneEnum.RESTAPI,
+            type = IdempotentTypeEnum.SPEL
+    )
     @Operation(summary = "退票")
     @GetMapping("/api/ticket-service/ticket/return")
     public Result<?> returnTickets(@RequestParam String orderNo) {
