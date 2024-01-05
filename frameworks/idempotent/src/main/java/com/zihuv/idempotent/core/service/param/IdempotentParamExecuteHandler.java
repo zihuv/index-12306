@@ -7,7 +7,6 @@ import com.zihuv.idempotent.annotation.Idempotent;
 import com.zihuv.idempotent.core.AbstractIdempotentExecuteHandler;
 import com.zihuv.idempotent.core.IdempotentExecuteHandler;
 import com.zihuv.idempotent.pojo.IdempotentParamWrapper;
-import com.zihuv.index12306.frameworks.starter.user.core.UserContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -22,12 +21,12 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class IdempotentParamExecuteHandler extends AbstractIdempotentExecuteHandler implements IdempotentExecuteHandler {
 
-    private final RedisTemplate<String,Object> redisTemplate;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
     protected String buildLockKey(ProceedingJoinPoint joinPoint, Idempotent idempotent) {
-        // key = 接口 + 用户 id + md5 请求参数
-        return StrUtil.format("idempotent:path:{}:{}:userId:{}:md5:{}", getServletPath(), idempotent.uniqueKeyPrefix(),getCurrentUserId(), calcArgsMD5(joinPoint));
+        // key = 接口 + 自定义 key + md5 请求参数
+        return StrUtil.format("idempotent:path:{}:{}:md5:{}", getServletPath(), idempotent.uniqueKeyPrefix(), calcArgsMD5(joinPoint));
     }
 
     @Override
@@ -46,14 +45,7 @@ public class IdempotentParamExecuteHandler extends AbstractIdempotentExecuteHand
      */
     private String getServletPath() {
         ServletRequestAttributes sra = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        return sra != null ? sra.getRequest().getServletPath() : null;
-    }
-
-    /**
-     * @return 当前操作用户 ID
-     */
-    private Long getCurrentUserId() {
-        return UserContext.getUserId();
+        return sra != null ? sra.getRequest().getServletPath() : "/default-inner-request";
     }
 
     /**
