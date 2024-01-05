@@ -1,6 +1,5 @@
 package com.zihuv.payservice.mq.consumer;
 
-import cn.hutool.core.util.StrUtil;
 import com.zihuv.base.util.JSON;
 import com.zihuv.idempotent.annotation.Idempotent;
 import com.zihuv.idempotent.enums.IdempotentSceneEnum;
@@ -10,9 +9,9 @@ import com.zihuv.mq.domain.MessageWrapper;
 import com.zihuv.orderservice.mq.event.RefundEvent;
 import com.zihuv.payservice.common.constant.PayRocketMQConstant;
 import com.zihuv.payservice.common.enums.PayStrategyEnum;
+import com.zihuv.payservice.controller.PayController;
 import com.zihuv.payservice.feign.PayFeign;
-import com.zihuv.payservice.pojo.RefundParam;
-import com.zihuv.web.utils.OpenFeignUtil;
+import com.zihuv.payservice.model.param.RefundParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -32,6 +31,7 @@ import static com.zihuv.payservice.common.constant.IdempotentConstant.REFUND_CON
 public class RefundConsumer implements RocketMQListener<MessageWrapper<RefundEvent>> {
 
     private final PayFeign payFeign;
+    private final PayController payController;
 
     @Idempotent(
             uniqueKeyPrefix = REFUND_CONSUMER_KEY,
@@ -51,9 +51,6 @@ public class RefundConsumer implements RocketMQListener<MessageWrapper<RefundEve
         refundParam.setOrderNo(refundEvent.getOrderNo());
         refundParam.setRefundAmount(refundEvent.getRefundAmount());
 
-        // TODO 幂等消费消息；自己给自己发请求？
-        OpenFeignUtil.send(
-                () -> payFeign.refund(refundParam),
-                StrUtil.format("[订单退款] 消息消费失败，消息体：{}", refundParam));
+        payController.refund(refundParam);
     }
 }
