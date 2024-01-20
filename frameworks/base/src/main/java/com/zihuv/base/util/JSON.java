@@ -47,6 +47,17 @@ public class JSON {
     /**
      * 将 json 反序列化为 javaBean
      *
+     * @param object  Object 类型的 json
+     * @param tClass 目标数据类型字节码
+     * @return T 目标数据类型
+     */
+    public static <T> T toBean(Object object, Class<T> tClass) {
+        return toBean(JSON.toJsonStr(object),tClass);
+    }
+
+    /**
+     * 将 json 反序列化为 javaBean
+     *
      * @param json   json 字符串
      * @param tClass 目标数据类型字节码
      * @return T 目标数据类型
